@@ -21,6 +21,11 @@ const PAYMENT_INFO = {
   },
 };
 
+const PLAN_PRICES = {
+  starter: 2850,
+  pro: 7350,
+};
+
 export default function UpgradePage() {
   const { t, dir } = useLanguage();
   const { user } = useAuth();
