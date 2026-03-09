@@ -233,6 +233,34 @@ export function LandingPreview() {
               <Smartphone className="w-4 h-4" />
             </Button>
           </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Settings className="w-4 h-4" /> {lang === "fr" ? "Paramètres" : "إعدادات"}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>{lang === "fr" ? "Paramètres du projet" : "إعدادات المشروع"}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <Label>{lang === "fr" ? "Numéro WhatsApp du vendeur" : "رقم WhatsApp للبائع"}</Label>
+                  <Input
+                    placeholder={lang === "fr" ? "Ex: +213 555 123 456" : "مثال: 213555123456+"}
+                    value={generatedProject.whatsappNumber || ""}
+                    onChange={e => updateGeneratedProject(p => ({ ...p, whatsappNumber: e.target.value }))}
+                    dir="ltr"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {lang === "fr"
+                      ? "Inclure l'indicatif pays (ex: +213 pour l'Algérie). Les clients seront redirigés vers ce numéro."
+                      : "أضف رمز البلد (مثال: 213+ للجزائر). سيتم توجيه العملاء إلى هذا الرقم."}
+                  </p>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button variant="outline" size="sm" className="gap-1.5" onClick={handleSave}>
             <Save className="w-4 h-4" /> {lang === "fr" ? "Sauvegarder" : "حفظ"}
           </Button>
