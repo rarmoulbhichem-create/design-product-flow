@@ -8,6 +8,7 @@ function AppContent() {
 
   switch (currentView) {
     case "upload":
+    case "price":
     case "generating":
       return <ProductUpload />;
     case "preview":

@@ -2,35 +2,41 @@ import { useCallback, useState } from "react";
 import { useApp } from "@/contexts/AppContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Upload, Loader2, Sparkles, CheckCircle, AlertCircle, Image as ImageIcon } from "lucide-react";
+import { Upload, Loader2, Sparkles, CheckCircle, AlertCircle, Image as ImageIcon, ArrowRight, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const GENERATION_STEPS = [
-  { label: "Analyse du produit par l'IA...", progress: 10 },
-  { label: "Identification des caractéristiques...", progress: 25 },
-  { label: "Génération du contenu marketing...", progress: 40 },
-  { label: "Création des images produit...", progress: 55 },
-  { label: "Génération des visuels lifestyle...", progress: 70 },
-  { label: "Assemblage de la landing page...", progress: 85 },
-  { label: "Optimisation SEO & finalisation...", progress: 95 },
-  { label: "Landing page générée !", progress: 100 },
+  { label: "تحليل المنتج بالذكاء الاصطناعي...", progress: 10 },
+  { label: "التعرف على المنتج والبحث عن معلوماته...", progress: 25 },
+  { label: "إنشاء المحتوى التسويقي بالعربية...", progress: 40 },
+  { label: "إنشاء صور المنتج الاحترافية...", progress: 55 },
+  { label: "تصميم الصور بأسلوب lifestyle...", progress: 70 },
+  { label: "تجميع صفحة الهبوط...", progress: 85 },
+  { label: "تحسين SEO والإنهاء...", progress: 95 },
+  { label: "تم إنشاء صفحة الهبوط! ✅", progress: 100 },
 ];
 
 export function ProductUpload() {
   const {
+    currentView,
     setCurrentView,
     setGeneratedProject,
     setProductImage,
     setIsGenerating,
     setGenerationProgress,
     setGenerationStep,
+    setUserPrice,
+    userPrice,
     isGenerating,
     generationProgress,
     generationStep,
     selectedTemplate,
+    productImageUrl,
+    productImageBase64,
   } = useApp();
 
   const [isDragging, setIsDragging] = useState(false);
@@ -59,41 +65,36 @@ export function ProductUpload() {
       } else {
         clearInterval(interval);
       }
-    }, 3000);
+    }, 3500);
     return interval;
   };
 
-  const handleGenerate = async (file: File) => {
+  const handleGenerate = async () => {
+    if (!productImageBase64 || !productImageUrl) return;
+    
     setError(null);
     setIsGenerating(true);
     setCurrentView("generating");
     setGenerationProgress(5);
-    setGenerationStep("Préparation de l'image...");
+    setGenerationStep("تحضير الصورة...");
 
     const progressInterval = simulateProgress();
 
     try {
-      const base64 = await fileToBase64(file);
-      const url = URL.createObjectURL(file);
-      setProductImage(url, base64);
-      setPreviewUrl(url);
-
-      // Step 1: Analyze product
+      // Step 1: Analyze product with price
       const { data: analysisData, error: analysisError } = await supabase.functions.invoke("analyze-product", {
-        body: { imageBase64: base64 },
+        body: { imageBase64: productImageBase64, userPrice: userPrice || null },
       });
 
-      if (analysisError) throw new Error(analysisError.message || "Erreur d'analyse");
+      if (analysisError) throw new Error(analysisError.message || "خطأ في التحليل");
       if (analysisData?.error) throw new Error(analysisData.error);
 
-      // Step 2: Generate images in parallel
+      // Step 2: Generate matching images
       const { data: imageData } = await supabase.functions.invoke("generate-product-images", {
         body: {
-          imageBase64: base64,
+          imageBase64: productImageBase64,
           productName: analysisData.product?.name,
           productCategory: analysisData.product?.category,
-          designMood: analysisData.design?.mood,
-          primaryColor: analysisData.design?.primaryColor,
         },
       });
 
@@ -102,7 +103,7 @@ export function ProductUpload() {
       const generatedImages = imageData?.images || [];
 
       setGenerationProgress(100);
-      setGenerationStep("Landing page générée !");
+      setGenerationStep("تم إنشاء صفحة الهبوط! ✅");
 
       setGeneratedProject({
         product: analysisData.product,
@@ -110,7 +111,7 @@ export function ProductUpload() {
         landingPage: analysisData.landingPage,
         seo: analysisData.seo,
         design: analysisData.design,
-        productImageUrl: url,
+        productImageUrl,
         generatedImages,
         template: selectedTemplate,
       });
@@ -118,15 +119,15 @@ export function ProductUpload() {
       setTimeout(() => {
         setIsGenerating(false);
         setCurrentView("preview");
-        toast.success(`Landing page générée avec ${generatedImages.length} images !`);
+        toast.success(`تم إنشاء صفحة الهبوط مع ${generatedImages.length} صور!`);
       }, 800);
     } catch (err) {
       clearInterval(progressInterval);
       console.error("Generation error:", err);
-      setError(err instanceof Error ? err.message : "Erreur inconnue");
+      setError(err instanceof Error ? err.message : "خطأ غير معروف");
       setIsGenerating(false);
-      setCurrentView("upload");
-      toast.error("Erreur lors de la génération");
+      setCurrentView("price");
+      toast.error("خطأ أثناء الإنشاء");
     }
   };
 
@@ -134,8 +135,10 @@ export function ProductUpload() {
     const file = Array.from(files).find(f => f.type.startsWith("image/"));
     if (!file) return;
     const url = URL.createObjectURL(file);
+    const base64 = await fileToBase64(file);
     setPreviewUrl(url);
-    await handleGenerate(file);
+    setProductImage(url, base64, file);
+    setCurrentView("price");
   };
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -158,20 +161,22 @@ export function ProductUpload() {
     if (e.target.files) handleFiles(e.target.files);
   };
 
-  if (isGenerating) {
+  // GENERATING VIEW
+  if (isGenerating || currentView === "generating") {
+    const imgUrl = previewUrl || productImageUrl;
     return (
-      <div className="min-h-[80vh] flex items-center justify-center animate-fade-in">
+      <div className="min-h-[80vh] flex items-center justify-center animate-fade-in" dir="rtl">
         <div className="max-w-lg w-full space-y-8 text-center">
-          {previewUrl && (
+          {imgUrl && (
             <div className="w-32 h-32 mx-auto rounded-2xl overflow-hidden border-2 border-primary/30 shadow-lg shadow-primary/20">
-              <img src={previewUrl} alt="Product" className="w-full h-full object-cover" />
+              <img src={imgUrl} alt="المنتج" className="w-full h-full object-cover" />
             </div>
           )}
           <div>
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
               <Sparkles className="w-8 h-8 text-primary animate-pulse" />
             </div>
-            <h2 className="text-2xl font-bold mb-2">Génération en cours...</h2>
+            <h2 className="text-2xl font-bold mb-2">جاري الإنشاء...</h2>
             <p className="text-muted-foreground">{generationStep}</p>
           </div>
           <div className="space-y-2">
@@ -189,7 +194,7 @@ export function ProductUpload() {
                 ) : (
                   <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" />
                 )}
-                <span className="text-left">{step.label.replace("...", "")}</span>
+                <span className="text-right">{step.label.replace("...", "")}</span>
               </div>
             ))}
           </div>
@@ -198,21 +203,88 @@ export function ProductUpload() {
     );
   }
 
+  // PRICE INPUT VIEW
+  if (currentView === "price") {
+    const imgUrl = previewUrl || productImageUrl;
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center animate-fade-in" dir="rtl">
+        <div className="max-w-xl w-full space-y-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold mb-3">
+              تم اختيار <span className="gradient-text">صورة المنتج</span>
+            </h2>
+            <p className="text-muted-foreground">أدخل السعر بالدينار الجزائري (اختياري) ثم ابدأ الإنشاء</p>
+          </div>
+
+          {imgUrl && (
+            <div className="w-48 h-48 mx-auto rounded-2xl overflow-hidden border-2 border-primary/30 shadow-xl shadow-primary/20">
+              <img src={imgUrl} alt="المنتج" className="w-full h-full object-cover" />
+            </div>
+          )}
+
+          <Card className="border-primary/20">
+            <CardContent className="p-6 space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <DollarSign className="w-4 h-4 text-primary" />
+                  سعر المنتج (دج - دينار جزائري)
+                </label>
+                <Input
+                  type="number"
+                  placeholder="مثال: 7999"
+                  value={userPrice}
+                  onChange={(e) => setUserPrice(e.target.value)}
+                  className="text-lg text-center h-14 text-xl font-bold"
+                  dir="ltr"
+                />
+                <p className="text-xs text-muted-foreground text-center">
+                  اتركه فارغاً ليقوم الذكاء الاصطناعي بتقدير السعر تلقائياً
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => {
+                setPreviewUrl(null);
+                setCurrentView("upload");
+              }}
+            >
+              تغيير الصورة
+            </Button>
+            <Button
+              className="flex-1 btn-gradient gap-2 text-lg h-14"
+              onClick={handleGenerate}
+            >
+              <Sparkles className="w-5 h-5" />
+              إنشاء صفحة الهبوط
+              <ArrowRight className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // UPLOAD VIEW
   return (
-    <div className="min-h-[80vh] flex items-center justify-center animate-fade-in">
+    <div className="min-h-[80vh] flex items-center justify-center animate-fade-in" dir="rtl">
       <div className="max-w-2xl w-full space-y-8">
         <div className="text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm mb-6">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span>IA génère tout automatiquement</span>
+            <span>الذكاء الاصطناعي يُنشئ كل شيء تلقائياً</span>
           </div>
           <h1 className="text-4xl font-bold mb-3">
-            Uploadez une photo,{" "}
-            <span className="gradient-text">obtenez votre landing page</span>
+            ارفع صورة المنتج،{" "}
+            <span className="gradient-text">احصل على صفحة هبوط كاملة</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            L'IA analyse votre produit, génère le contenu, crée des images professionnelles 
-            et assemble une page prête à vendre sur WordPress.
+            الذكاء الاصطناعي يتعرف على منتجك، يبحث عن معلوماته، يُنشئ صوراً احترافية
+            مطابقة للمنتج الأصلي، ويُجمّع صفحة هبوط جاهزة للبيع على WordPress.
           </p>
         </div>
 
@@ -221,10 +293,10 @@ export function ProductUpload() {
             <CardContent className="p-4 flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-destructive shrink-0" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-destructive">Erreur de génération</p>
+                <p className="text-sm font-medium text-destructive">خطأ في الإنشاء</p>
                 <p className="text-xs text-muted-foreground">{error}</p>
               </div>
-              <Button variant="outline" size="sm" onClick={() => setError(null)}>Réessayer</Button>
+              <Button variant="outline" size="sm" onClick={() => setError(null)}>إعادة المحاولة</Button>
             </CardContent>
           </Card>
         )}
@@ -245,23 +317,23 @@ export function ProductUpload() {
                 <Upload className="w-12 h-12 text-primary" />
               </div>
               <p className="text-xl font-semibold mb-2">
-                {isDragging ? "Déposez votre image ici" : "Glissez-déposez votre image produit"}
+                {isDragging ? "أسقط صورتك هنا" : "اسحب وأسقط صورة المنتج"}
               </p>
-              <p className="text-muted-foreground mb-6">ou cliquez pour sélectionner</p>
+              <p className="text-muted-foreground mb-6">أو انقر للاختيار</p>
               <Button className="btn-gradient gap-2" size="lg">
                 <ImageIcon className="w-5 h-5" />
-                Choisir une image
+                اختر صورة
               </Button>
-              <p className="text-xs text-muted-foreground mt-4">PNG, JPG, WEBP • Max 20MB</p>
+              <p className="text-xs text-muted-foreground mt-4">PNG, JPG, WEBP • حد أقصى 20MB</p>
             </label>
           </CardContent>
         </Card>
 
         <div className="grid grid-cols-3 gap-4 text-center">
           {[
-            { icon: "🔍", title: "Analyse IA", desc: "Identification automatique du produit" },
-            { icon: "🎨", title: "Images générées", desc: "Visuels professionnels créés par l'IA" },
-            { icon: "🚀", title: "Export WordPress", desc: "Page prête à publier" },
+            { icon: "🔍", title: "تعرّف ذكي", desc: "التعرف الدقيق على المنتج الأصلي" },
+            { icon: "🎨", title: "صور مطابقة", desc: "صور احترافية مطابقة للمنتج" },
+            { icon: "🚀", title: "جاهز لـ WordPress", desc: "صفحة جاهزة للنشر والبيع" },
           ].map(item => (
             <div key={item.title} className="p-4 rounded-xl bg-card border border-border">
               <div className="text-2xl mb-2">{item.icon}</div>

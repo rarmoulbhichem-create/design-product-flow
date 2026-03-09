@@ -2,10 +2,12 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import { GeneratedProject, LandingTemplate } from "@/types/project";
 
 interface AppState {
-  currentView: "upload" | "generating" | "preview" | "export";
+  currentView: "upload" | "price" | "generating" | "preview" | "export";
   generatedProject: GeneratedProject | null;
   productImageUrl: string | null;
   productImageBase64: string | null;
+  productFile: File | null;
+  userPrice: string;
   isGenerating: boolean;
   generationProgress: number;
   generationStep: string;
@@ -15,7 +17,8 @@ interface AppState {
 interface AppContextType extends AppState {
   setCurrentView: (view: AppState["currentView"]) => void;
   setGeneratedProject: (project: GeneratedProject | null) => void;
-  setProductImage: (url: string, base64: string) => void;
+  setProductImage: (url: string, base64: string, file?: File) => void;
+  setUserPrice: (price: string) => void;
   setIsGenerating: (val: boolean) => void;
   setGenerationProgress: (val: number) => void;
   setGenerationStep: (val: string) => void;
@@ -28,6 +31,8 @@ const initialState: AppState = {
   generatedProject: null,
   productImageUrl: null,
   productImageBase64: null,
+  productFile: null,
+  userPrice: "",
   isGenerating: false,
   generationProgress: 0,
   generationStep: "",
@@ -47,8 +52,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, generatedProject }));
   }, []);
 
-  const setProductImage = useCallback((url: string, base64: string) => {
-    setState(prev => ({ ...prev, productImageUrl: url, productImageBase64: base64 }));
+  const setProductImage = useCallback((url: string, base64: string, file?: File) => {
+    setState(prev => ({ ...prev, productImageUrl: url, productImageBase64: base64, productFile: file || null }));
+  }, []);
+
+  const setUserPrice = useCallback((userPrice: string) => {
+    setState(prev => ({ ...prev, userPrice }));
   }, []);
 
   const setIsGenerating = useCallback((isGenerating: boolean) => {
@@ -77,6 +86,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setCurrentView,
       setGeneratedProject,
       setProductImage,
+      setUserPrice,
       setIsGenerating,
       setGenerationProgress,
       setGenerationStep,
