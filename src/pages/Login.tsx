@@ -47,7 +47,7 @@ export default function LoginPage() {
             <Sparkles className="w-8 h-8 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold mb-2">LandPage AI</h1>
-          <p className="text-muted-foreground">{t.loginSubtitle || (dir === "rtl" ? "سجّل الدخول للمتابعة" : "Connectez-vous pour continuer")}</p>
+          <p className="text-muted-foreground">{dir === "rtl" ? "سجّل الدخول للمتابعة" : "Connectez-vous pour continuer"}</p>
         </div>
 
         <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
