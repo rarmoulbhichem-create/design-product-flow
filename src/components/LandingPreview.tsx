@@ -685,6 +685,7 @@ export function LandingPreview() {
         </section>
 
         {/* FAQ */}
+        <ScrollReveal>
         <section className={cn("py-16 md:py-20", tmpl.sectionAltClass)}>
           <div className="container mx-auto px-4 max-w-3xl">
             <h2 className={cn("text-2xl md:text-3xl font-bold text-center mb-12", tmpl.headingClass && !tmpl.headingClass.includes("bg-clip") ? tmpl.headingClass : "")}>{t.faq}</h2>
@@ -712,8 +713,10 @@ export function LandingPreview() {
             </div>
           </div>
         </section>
+        </ScrollReveal>
 
         {/* FINAL CTA */}
+        <ScrollReveal>
         <section className="py-16 md:py-24 relative overflow-hidden">
           {!tmpl.isDark && <div className="absolute inset-0 opacity-5" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }} />}
           {tmpl.isDark && <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />}
@@ -733,13 +736,22 @@ export function LandingPreview() {
               className={cn("text-lg max-w-xl mx-auto", tmpl.isDark ? "text-white/60" : "text-muted-foreground")}
               multiline
             />
-            <Button size="lg" className={cn("text-lg px-12 py-6", tmpl.ctaClass)} style={!tmpl.ctaClass.includes("bg-") ? { background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` } : undefined}>
-              <EditableText
-                value={landingPage.finalCta?.buttonText || landingPage.hero.ctaText}
-                onChange={v => updateFinalCta({ buttonText: v })}
-                editMode={editMode}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button size="lg" className={cn("text-lg px-12 py-6", tmpl.ctaClass)} style={!tmpl.ctaClass.includes("bg-") ? { background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` } : undefined}>
+                <EditableText
+                  value={landingPage.finalCta?.buttonText || landingPage.hero.ctaText}
+                  onChange={v => updateFinalCta({ buttonText: v })}
+                  editMode={editMode}
+                />
+              </Button>
+              <WhatsAppButton
+                productName={product.name}
+                price={pricing.price}
+                currency={pricing.currency}
+                inline
+                label={selectedLanguage === "fr" ? "Commander via WhatsApp" : "اطلب عبر WhatsApp"}
               />
-            </Button>
+            </div>
             <EditableText
               value={landingPage.finalCta?.guaranteeText || pricing.guarantee}
               onChange={v => updateFinalCta({ guaranteeText: v })}
@@ -749,6 +761,7 @@ export function LandingPreview() {
             />
           </div>
         </section>
+        </ScrollReveal>
 
         {/* FOOTER */}
         <footer className={cn("py-8 border-t text-center", tmpl.isDark ? "border-white/10" : "border-border")}>
@@ -756,6 +769,14 @@ export function LandingPreview() {
             {t.allRights(product.brand || product.name)}
           </p>
         </footer>
+
+        {/* Floating WhatsApp Button */}
+        <WhatsAppButton
+          productName={product.name}
+          price={pricing.price}
+          currency={pricing.currency}
+          label={selectedLanguage === "fr" ? "Commander" : "اطلب الآن"}
+        />
         </motion.div>
       </AnimatePresence>
     </div>
