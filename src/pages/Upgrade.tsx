@@ -60,7 +60,7 @@ export default function UpgradePage() {
     try {
       const { error } = await supabase.from("payment_requests").insert({
         user_id: user.id,
-        amount: 2000,
+        amount: PLAN_PRICES.pro,
         payment_method: paymentMethod,
         transaction_id: transactionId.trim(),
         status: "pending",
