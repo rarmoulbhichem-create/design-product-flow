@@ -37,6 +37,8 @@ export function ProductUpload() {
     setGenerationStep,
     setUserPrice,
     userPrice,
+    selectedLanguage,
+    setSelectedLanguage,
     isGenerating,
     generationProgress,
     generationStep,
