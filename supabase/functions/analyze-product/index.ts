@@ -180,8 +180,14 @@ ${lang.testimonialNames}
   }` : ""}
 }`;
 
+    const langNote = language === "fr" 
+      ? "Génère tout le contenu marketing en français algérien. Devise: Dinar algérien (DZD)."
+      : language === "both"
+      ? "Génère le contenu principal en arabe algérien, avec une version française complète dans frenchVersion. Devise: Dinar algérien (DZD)."
+      : "أنشئ كل المحتوى التسويقي باللغة العربية والعملة بالدينار الجزائري.";
+
     const userMessage: any[] = [
-      { type: "text", text: `${multiImageNote} تعرّف على المنتج الحقيقي بالضبط كما يظهر في الصور - اسمه، علامته التجارية، مواصفاته الحقيقية. ابحث في معرفتك عن هذا المنتج تحديداً وليس منتجاً مشابهاً. أنشئ كل المحتوى التسويقي لصفحة هبوط بيع عالية التحويل. كل المحتوى باللغة العربية والعملة بالدينار الجزائري.` },
+      { type: "text", text: `${multiImageNote} تعرّف على المنتج الحقيقي بالضبط كما يظهر في الصور - اسمه، علامته التجارية، مواصفاته الحقيقية. ابحث في معرفتك عن هذا المنتج تحديداً وليس منتجاً مشابهاً. أنشئ كل المحتوى التسويقي لصفحة هبوط بيع عالية التحويل. ${langNote}` },
       ...imageContents
     ];
 
