@@ -96,6 +96,8 @@ export function LandingPreview() {
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [editMode, setEditMode] = useState(false);
 
+  const t = UI_TEXT[selectedLanguage === "fr" ? "fr" : "ar"];
+
   if (!generatedProject) return null;
 
   const { product, pricing, landingPage, design, productImageUrl, generatedImages = [] } = generatedProject;
