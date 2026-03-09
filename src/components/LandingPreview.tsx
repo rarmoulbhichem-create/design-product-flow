@@ -16,6 +16,7 @@ import { EditableText } from "./EditableText";
 import { EditableImage } from "./EditableImage";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { TEMPLATE_STYLES, TEMPLATE_LIST, type TemplateStyle } from "@/lib/templates";
+import { TemplatePicker } from "./TemplatePicker";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Star, Shield, Zap, Heart, Check, Truck, Lock, RefreshCw, Headphones,
@@ -123,7 +124,6 @@ export function LandingPreview() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [editMode, setEditMode] = useState(false);
-  const [showAllTemplates, setShowAllTemplates] = useState(false);
 
   const t = UI_TEXT[lang];
 
@@ -176,9 +176,6 @@ export function LandingPreview() {
       ...p, product: { ...p.product, specifications: p.product.specifications.map((s, idx) => idx === i ? { ...s, [field]: val } : s) }
     }));
 
-  // Show first 4 or all templates
-  const visibleTemplates = showAllTemplates ? TEMPLATE_LIST : TEMPLATE_LIST.slice(0, 5);
-
   return (
     <div className="animate-fade-in">
       {/* Toolbar */}
@@ -188,25 +185,11 @@ export function LandingPreview() {
             <ArrowLeft className="w-4 h-4 ml-1" /> {t.new}
           </Button>
           <div className="h-6 w-px bg-border" />
-          <div className="flex gap-1 flex-wrap">
-            {visibleTemplates.map(tmplItem => (
-              <Button
-                key={tmplItem.id}
-                variant={generatedProject.template === tmplItem.id ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setSelectedTemplate(tmplItem.id)}
-                className="text-xs gap-1"
-              >
-                <Palette className="w-3 h-3" />
-                {selectedLanguage === "fr" ? tmplItem.name : tmplItem.nameAr}
-              </Button>
-            ))}
-            {!showAllTemplates && TEMPLATE_LIST.length > 5 && (
-              <Button variant="outline" size="sm" onClick={() => setShowAllTemplates(true)} className="text-xs">
-                +{TEMPLATE_LIST.length - 5} {t.moreTemplates}
-              </Button>
-            )}
-          </div>
+          <TemplatePicker
+            current={generatedProject.template}
+            onSelect={setSelectedTemplate}
+            lang={lang}
+          />
         </div>
         <div className="flex items-center gap-2">
           {editMode && (
