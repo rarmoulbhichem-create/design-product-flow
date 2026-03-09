@@ -1,17 +1,33 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ArrowRight, Zap, Package, Image, FileCode, Check } from "lucide-react";
+import { Sparkles, ArrowRight, Zap, Package, Image, FileCode, Check, LogIn } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LandingPage() {
   const { t, dir } = useLanguage();
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen" dir={dir}>
-      {/* Language switcher in header */}
-      <div className="absolute top-4 right-4 z-50">
+      {/* Header with language switcher and login */}
+      <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
         <LanguageSwitcher />
+        {!user ? (
+          <Button asChild variant="outline" size="sm" className="gap-2">
+            <Link to="/login">
+              <LogIn className="w-4 h-4" />
+              {dir === "rtl" ? "تسجيل الدخول" : "Connexion"}
+            </Link>
+          </Button>
+        ) : (
+          <Button asChild variant="outline" size="sm">
+            <Link to="/dashboard">
+              {dir === "rtl" ? "لوحة التحكم" : "Dashboard"}
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* Hero Section */}
