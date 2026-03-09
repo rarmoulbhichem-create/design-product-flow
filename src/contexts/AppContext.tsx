@@ -12,6 +12,7 @@ interface AppState {
   generatedProject: GeneratedProject | null;
   productImages: UploadedProductImage[];
   userPrice: string;
+  selectedLanguage: LandingLanguage;
   isGenerating: boolean;
   generationProgress: number;
   generationStep: string;
