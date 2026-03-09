@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Upload, Loader2, Sparkles, CheckCircle, AlertCircle, Image as ImageIcon, ArrowRight, DollarSign, X, Plus } from "lucide-react";
+import { Upload, Loader2, Sparkles, CheckCircle, AlertCircle, Image as ImageIcon, ArrowRight, DollarSign, X, Plus, Globe } from "lucide-react";
+import type { LandingLanguage } from "@/types/project";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -36,6 +37,8 @@ export function ProductUpload() {
     setGenerationStep,
     setUserPrice,
     userPrice,
+    selectedLanguage,
+    setSelectedLanguage,
     isGenerating,
     generationProgress,
     generationStep,
@@ -92,7 +95,8 @@ export function ProductUpload() {
         body: { 
           imageBase64: imagesBase64[0], 
           additionalImages: imagesBase64.slice(1),
-          userPrice: userPrice || null 
+          userPrice: userPrice || null,
+          language: selectedLanguage,
         },
       });
 
@@ -261,6 +265,38 @@ export function ProductUpload() {
               </div>
             ))}
           </div>
+
+          {/* Language selector */}
+          <Card className="border-primary/20">
+            <CardContent className="p-6 space-y-3">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Globe className="w-4 h-4 text-primary" />
+                لغة صفحة الهبوط
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {([
+                  { id: "ar" as LandingLanguage, label: "العربية", flag: "🇩🇿", desc: "عربية جزائرية" },
+                  { id: "fr" as LandingLanguage, label: "Français", flag: "🇫🇷", desc: "فرنسية جزائرية" },
+                  { id: "both" as LandingLanguage, label: "الاثنتان", flag: "🌍", desc: "عربية + فرنسية" },
+                ]).map(lang => (
+                  <button
+                    key={lang.id}
+                    onClick={() => setSelectedLanguage(lang.id)}
+                    className={cn(
+                      "p-4 rounded-xl border-2 text-center transition-all",
+                      selectedLanguage === lang.id
+                        ? "border-primary bg-primary/10 shadow-md shadow-primary/10"
+                        : "border-border hover:border-primary/30"
+                    )}
+                  >
+                    <span className="text-2xl block mb-1">{lang.flag}</span>
+                    <span className="font-semibold text-sm block">{lang.label}</span>
+                    <span className="text-[10px] text-muted-foreground">{lang.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           <Card className="border-primary/20">
             <CardContent className="p-6 space-y-4">

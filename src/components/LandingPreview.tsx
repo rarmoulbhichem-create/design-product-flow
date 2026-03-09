@@ -43,7 +43,7 @@ function formatPrice(price: number, currency: string) {
 }
 
 export function LandingPreview() {
-  const { generatedProject, setCurrentView, setSelectedTemplate, resetApp, updateGeneratedProject } = useApp();
+  const { generatedProject, setCurrentView, setSelectedTemplate, resetApp, updateGeneratedProject, selectedLanguage } = useApp();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [editMode, setEditMode] = useState(false);
@@ -157,14 +157,14 @@ export function LandingPreview() {
       <div className={cn(
         "mx-auto transition-all duration-500",
         viewMode === "mobile" ? "max-w-[390px]" : "max-w-full"
-      )} dir="rtl">
+      )} dir={selectedLanguage === "fr" ? "ltr" : "rtl"}>
 
         {/* HERO */}
         <section className="relative overflow-hidden py-16 md:py-24">
           <div className="absolute inset-0 opacity-10" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }} />
           <div className="relative container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
-              <div className="flex-1 text-center md:text-right space-y-6">
+              <div className={cn("flex-1 text-center space-y-6", selectedLanguage === "fr" ? "md:text-left" : "md:text-right")}>
                 {landingPage.hero.badge && (
                   <Badge className="text-sm px-4 py-1" style={{ backgroundColor: `${primaryColor}20`, color: primaryColor, border: `1px solid ${primaryColor}40` }}>
                     <EditableText value={landingPage.hero.badge} onChange={v => updateHero({ badge: v })} editMode={editMode} />

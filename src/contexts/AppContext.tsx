@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
-import { GeneratedProject, LandingTemplate } from "@/types/project";
+import { GeneratedProject, LandingTemplate, LandingLanguage } from "@/types/project";
 
 interface UploadedProductImage {
   url: string;
@@ -12,6 +12,7 @@ interface AppState {
   generatedProject: GeneratedProject | null;
   productImages: UploadedProductImage[];
   userPrice: string;
+  selectedLanguage: LandingLanguage;
   isGenerating: boolean;
   generationProgress: number;
   generationStep: string;
@@ -26,6 +27,7 @@ interface AppContextType extends AppState {
   removeProductImage: (index: number) => void;
   clearProductImages: () => void;
   setUserPrice: (price: string) => void;
+  setSelectedLanguage: (lang: LandingLanguage) => void;
   setIsGenerating: (val: boolean) => void;
   setGenerationProgress: (val: number) => void;
   setGenerationStep: (val: string) => void;
@@ -42,6 +44,7 @@ const initialState: AppState = {
   generatedProject: null,
   productImages: [],
   userPrice: "",
+  selectedLanguage: "ar",
   isGenerating: false,
   generationProgress: 0,
   generationStep: "",
@@ -98,6 +101,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, userPrice }));
   }, []);
 
+  const setSelectedLanguage = useCallback((selectedLanguage: LandingLanguage) => {
+    setState(prev => ({ ...prev, selectedLanguage }));
+  }, []);
+
   const setIsGenerating = useCallback((isGenerating: boolean) => {
     setState(prev => ({ ...prev, isGenerating }));
   }, []);
@@ -132,6 +139,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       clearProductImages,
       setProductImage,
       setUserPrice,
+      setSelectedLanguage,
       setIsGenerating,
       setGenerationProgress,
       setGenerationStep,

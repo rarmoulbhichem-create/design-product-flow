@@ -114,6 +114,8 @@ export interface GeneratedProject {
 
 export type LandingTemplate = "suspended" | "elegant" | "bold" | "minimal";
 
+export type LandingLanguage = "ar" | "fr" | "both";
+
 export interface UploadedImage {
   id: string;
   url: string;
