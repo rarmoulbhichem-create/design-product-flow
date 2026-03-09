@@ -28,6 +28,17 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -170,15 +181,38 @@ export function AppSidebar() {
             </Button>
           </div>
         )}
-        <Button
-          variant="ghost"
-          size={collapsed ? "icon" : "sm"}
-          className="w-full gap-2 text-muted-foreground hover:text-destructive"
-          onClick={signOut}
-        >
-          <LogOut className="w-4 h-4" />
-          {!collapsed && (dir === "ltr" ? "Déconnexion" : "تسجيل الخروج")}
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size={collapsed ? "icon" : "sm"}
+              className="w-full gap-2 text-muted-foreground hover:text-destructive"
+            >
+              <LogOut className="w-4 h-4" />
+              {!collapsed && (dir === "ltr" ? "Déconnexion" : "تسجيل الخروج")}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {dir === "rtl" ? "تأكيد تسجيل الخروج" : "Confirmer la déconnexion"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {dir === "rtl"
+                  ? "هل أنت متأكد أنك تريد تسجيل الخروج؟"
+                  : "Êtes-vous sûr de vouloir vous déconnecter ?"}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>
+                {dir === "rtl" ? "إلغاء" : "Annuler"}
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={signOut}>
+                {dir === "rtl" ? "تسجيل الخروج" : "Déconnexion"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </SidebarFooter>
     </Sidebar>
   );
