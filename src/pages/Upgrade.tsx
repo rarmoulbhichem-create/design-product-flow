@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Crown, Copy, Check, ArrowLeft, CreditCard } from "lucide-react";
+import { Crown, Copy, Check, ArrowLeft, CreditCard, Clock, XCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,13 +35,57 @@ export default function UpgradePage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [pendingRequest, setPendingRequest] = useState<{ id: string; transaction_id: string | null; created_at: string } | null>(null);
+  const [loadingPending, setLoadingPending] = useState(true);
+  const [cancelling, setCancelling] = useState(false);
 
   const isFr = dir === "ltr";
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("payment_requests")
+      .select("id, transaction_id, created_at")
+      .eq("user_id", user.id)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .then(({ data }) => {
+        setPendingRequest(data?.[0] ?? null);
+        setLoadingPending(false);
+      });
+  }, [user]);
 
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
     setCopiedField(field);
     setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const handleCancel = async () => {
+    if (!pendingRequest) return;
+    setCancelling(true);
+    try {
+      const { error } = await supabase
+        .from("payment_requests")
+        .delete()
+        .eq("id", pendingRequest.id);
+      if (error) throw error;
+      setPendingRequest(null);
+      toast({
+        title: isFr ? "Demande annulée" : "تم إلغاء الطلب",
+        description: isFr ? "Votre demande a été annulée avec succès" : "تم إلغاء طلبك بنجاح",
+      });
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: isFr ? "Erreur" : "خطأ",
+        description: isFr ? "Impossible d'annuler la demande" : "تعذر إلغاء الطلب",
+        variant: "destructive",
+      });
+    } finally {
+      setCancelling(false);
+    }
   };
 
   const handleSubmit = async () => {
