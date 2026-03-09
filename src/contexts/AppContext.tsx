@@ -101,6 +101,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, userPrice }));
   }, []);
 
+  const setSelectedLanguage = useCallback((selectedLanguage: LandingLanguage) => {
+    setState(prev => ({ ...prev, selectedLanguage }));
+  }, []);
+
   const setIsGenerating = useCallback((isGenerating: boolean) => {
     setState(prev => ({ ...prev, isGenerating }));
   }, []);
