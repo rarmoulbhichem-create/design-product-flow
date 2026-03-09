@@ -17,12 +17,60 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Star, Shield, Zap, Heart, Check, Truck, Lock, RefreshCw, Headphones,
 };
 
-const TEMPLATES: { id: LandingTemplate; name: string; desc: string }[] = [
-  { id: "elegant", name: "أنيق", desc: "تصميم راقي وفاخر" },
-  { id: "bold", name: "جريء", desc: "ألوان قوية وتأثير بصري" },
-  { id: "minimal", name: "بسيط", desc: "نظيف وعصري" },
-  { id: "suspended", name: "معلّق", desc: "تأثير عائم إبداعي" },
+const TEMPLATES: { id: LandingTemplate; name: string; nameAr: string; desc: string }[] = [
+  { id: "elegant", name: "Élégant", nameAr: "أنيق", desc: "تصميم راقي وفاخر" },
+  { id: "bold", name: "Audacieux", nameAr: "جريء", desc: "ألوان قوية وتأثير بصري" },
+  { id: "minimal", name: "Minimal", nameAr: "بسيط", desc: "نظيف وعصري" },
+  { id: "suspended", name: "Suspendu", nameAr: "معلّق", desc: "تأثير عائم إبداعي" },
 ];
+
+// UI translations
+const UI_TEXT = {
+  ar: {
+    new: "جديد",
+    edit: "تحرير",
+    preview: "معاينة",
+    export: "تصدير",
+    editModeBanner: "وضع التحرير — انقر على أي نص أو صورة لتعديله",
+    whyChoose: (name: string) => `لماذا تختار ${name}؟`,
+    productDesc: "وصف المنتج",
+    specifications: "المواصفات",
+    features: "المميزات",
+    testimonials: "ماذا يقول عملاؤنا",
+    basedOn: (count: string) => `بناءً على ${count} تقييم`,
+    reviews: "تقييم",
+    satisfied: "عملاء راضون",
+    verified: "موثّق",
+    faq: "الأسئلة الشائعة",
+    readyToOrder: "هل أنت مستعد للطلب؟",
+    dontMiss: "لا تفوّت هذا العرض الاستثنائي.",
+    getItNow: "احصل عليه الآن",
+    allRights: (brand: string) => `© 2024 ${brand}. جميع الحقوق محفوظة.`,
+    currency: "دج",
+  },
+  fr: {
+    new: "Nouveau",
+    edit: "Modifier",
+    preview: "Aperçu",
+    export: "Exporter",
+    editModeBanner: "Mode édition — Cliquez sur n'importe quel texte ou image pour le modifier",
+    whyChoose: (name: string) => `Pourquoi choisir ${name} ?`,
+    productDesc: "Description du produit",
+    specifications: "Caractéristiques",
+    features: "Fonctionnalités",
+    testimonials: "Ce que disent nos clients",
+    basedOn: (count: string) => `Basé sur ${count} avis`,
+    reviews: "avis",
+    satisfied: "clients satisfaits",
+    verified: "Vérifié",
+    faq: "Questions fréquentes",
+    readyToOrder: "Prêt à commander ?",
+    dontMiss: "Ne manquez pas cette offre exceptionnelle.",
+    getItNow: "Obtenez-le maintenant",
+    allRights: (brand: string) => `© 2024 ${brand}. Tous droits réservés.`,
+    currency: "DA",
+  },
+};
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -47,6 +95,8 @@ export function LandingPreview() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [editMode, setEditMode] = useState(false);
+
+  const t = UI_TEXT[selectedLanguage === "fr" ? "fr" : "ar"];
 
   if (!generatedProject) return null;
 
@@ -102,20 +152,20 @@ export function LandingPreview() {
       <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border px-4 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => { resetApp(); setCurrentView("upload"); }}>
-            <ArrowLeft className="w-4 h-4 ml-1" /> جديد
+            <ArrowLeft className="w-4 h-4 ml-1" /> {t.new}
           </Button>
           <div className="h-6 w-px bg-border" />
           <div className="flex gap-1">
-            {TEMPLATES.map(t => (
+            {TEMPLATES.map(tmpl => (
               <Button
-                key={t.id}
-                variant={generatedProject.template === t.id ? "default" : "ghost"}
+                key={tmpl.id}
+                variant={generatedProject.template === tmpl.id ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setSelectedTemplate(t.id)}
-                className="text-xs"
+                onClick={() => setSelectedTemplate(tmpl.id)}
+                className="text-xs gap-1"
               >
-                <Palette className="w-3 h-3 ml-1" />
-                {t.name}
+                <Palette className="w-3 h-3" />
+                {selectedLanguage === "fr" ? tmpl.name : tmpl.nameAr}
               </Button>
             ))}
           </div>
@@ -129,7 +179,7 @@ export function LandingPreview() {
             className="gap-1.5"
           >
             {editMode ? <Eye className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
-            {editMode ? "معاينة" : "تحرير"}
+            {editMode ? t.preview : t.edit}
           </Button>
           <div className="flex border border-border rounded-lg overflow-hidden">
             <Button variant={viewMode === "desktop" ? "secondary" : "ghost"} size="sm" onClick={() => setViewMode("desktop")} className="rounded-none">
@@ -140,7 +190,7 @@ export function LandingPreview() {
             </Button>
           </div>
           <Button className="btn-gradient gap-2" size="sm" onClick={() => setCurrentView("export")}>
-            <Download className="w-4 h-4" /> تصدير
+            <Download className="w-4 h-4" /> {t.export}
           </Button>
         </div>
       </div>
@@ -149,7 +199,7 @@ export function LandingPreview() {
       {editMode && (
         <div className="bg-primary/10 border-b border-primary/20 px-4 py-2 text-center text-sm text-primary font-medium">
           <Pencil className="w-3.5 h-3.5 inline ml-1" />
-          وضع التحرير — انقر على أي نص أو صورة لتعديله
+          {t.editModeBanner}
         </div>
       )}
 
@@ -267,11 +317,11 @@ export function LandingPreview() {
                     <StarRating rating={Math.round(landingPage.socialProof.rating)} />
                     <span className="font-bold mr-1">{landingPage.socialProof.rating}/5</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{landingPage.socialProof.reviewCount.toLocaleString("ar-DZ")} تقييم</p>
+                  <p className="text-sm text-muted-foreground">{landingPage.socialProof.reviewCount.toLocaleString("ar-DZ")} {t.reviews}</p>
                 </div>
                 <div>
                   <p className="text-3xl font-bold" style={{ color: primaryColor }}>{landingPage.socialProof.satisfactionRate}%</p>
-                  <p className="text-sm text-muted-foreground">عملاء راضون</p>
+                  <p className="text-sm text-muted-foreground">{t.satisfied}</p>
                 </div>
               </div>
             </div>
@@ -282,7 +332,7 @@ export function LandingPreview() {
         <section className="py-16 md:py-20">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
-              لماذا تختار {product.name}؟
+              {t.whyChoose(product.name)}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {(landingPage.benefits || []).map((benefit, i) => {
@@ -308,9 +358,9 @@ export function LandingPreview() {
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row gap-12 items-start">
               <div className="flex-1">
-                <h2 className="text-2xl md:text-3xl font-bold mb-6">وصف المنتج</h2>
+                <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.productDesc}</h2>
                 <EditableText value={product.longDescription} onChange={v => updateProduct({ longDescription: v })} editMode={editMode} as="p" multiline className="text-muted-foreground leading-relaxed mb-8" />
-                <h3 className="text-xl font-semibold mb-4">المواصفات</h3>
+                <h3 className="text-xl font-semibold mb-4">{t.specifications}</h3>
                 <div className="space-y-3">
                   {(product.specifications || []).map((spec, i) => (
                     <div key={i} className="flex justify-between py-2 border-b border-border last:border-0">
@@ -351,7 +401,7 @@ export function LandingPreview() {
         {/* FEATURES */}
         <section className="py-16 md:py-20">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">المميزات</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">{t.features}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {(landingPage.features || []).map((feature, i) => (
                 <div key={i} className="p-5 rounded-xl border border-border hover:border-primary/30 transition-all">
@@ -373,33 +423,33 @@ export function LandingPreview() {
         {/* TESTIMONIALS */}
         <section className="py-16 md:py-20 bg-card/30">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">ماذا يقول عملاؤنا</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">{t.testimonials}</h2>
             <div className="flex justify-center mb-12">
               <div className="flex items-center gap-2">
                 <StarRating rating={5} />
                 <span className="text-sm text-muted-foreground">
-                  بناءً على {landingPage.socialProof?.reviewCount?.toLocaleString("ar-DZ")} تقييم
+                  {t.basedOn(landingPage.socialProof?.reviewCount?.toLocaleString("ar-DZ") || "0")}
                 </span>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {(landingPage.testimonials || []).map((t, i) => (
+              {(landingPage.testimonials || []).map((testimonial, i) => (
                 <Card key={i} className="p-5">
                   <CardContent className="p-0 space-y-3">
-                    <StarRating rating={t.rating} />
-                    <EditableText value={t.text} onChange={v => updateTestimonial(i, { text: v })} editMode={editMode} as="p" className="text-sm" multiline />
+                    <StarRating rating={testimonial.rating} />
+                    <EditableText value={testimonial.text} onChange={v => updateTestimonial(i, { text: v })} editMode={editMode} as="p" className="text-sm" multiline />
                     <div className="flex items-center justify-between pt-2 border-t border-border">
                       <div>
-                        <EditableText value={t.name} onChange={v => updateTestimonial(i, { name: v })} editMode={editMode} as="p" className="font-medium text-sm" />
-                        <EditableText value={t.location} onChange={v => updateTestimonial(i, { location: v })} editMode={editMode} as="p" className="text-xs text-muted-foreground" />
+                        <EditableText value={testimonial.name} onChange={v => updateTestimonial(i, { name: v })} editMode={editMode} as="p" className="font-medium text-sm" />
+                        <EditableText value={testimonial.location} onChange={v => updateTestimonial(i, { location: v })} editMode={editMode} as="p" className="text-xs text-muted-foreground" />
                       </div>
-                      {t.verified && (
+                      {testimonial.verified && (
                         <Badge variant="secondary" className="text-xs">
-                          <Check className="w-3 h-3 ml-1" /> موثّق
+                          <Check className="w-3 h-3 ml-1" /> {t.verified}
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">{t.date}</p>
+                    <p className="text-xs text-muted-foreground">{testimonial.date}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -453,13 +503,13 @@ export function LandingPreview() {
         {/* FAQ */}
         <section className="py-16 md:py-20 bg-card/30">
           <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">الأسئلة الشائعة</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">{t.faq}</h2>
             <div className="space-y-3">
               {(landingPage.faq || []).map((item, i) => (
                 <div key={i} className="border border-border rounded-xl overflow-hidden">
                   <button
                     onClick={() => !editMode && setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full flex items-center justify-between p-5 text-right hover:bg-card/50 transition-colors"
+                    className={cn("w-full flex items-center justify-between p-5 hover:bg-card/50 transition-colors", selectedLanguage === "fr" ? "text-left" : "text-right")}
                   >
                     <EditableText value={item.question} onChange={v => updateFaq(i, { question: v })} editMode={editMode} as="span" className="font-medium pl-4" />
                     {openFaq === i ? <ChevronUp className="w-5 h-5 shrink-0" /> : <ChevronDown className="w-5 h-5 shrink-0" />}
@@ -480,14 +530,14 @@ export function LandingPreview() {
           <div className="absolute inset-0 opacity-5" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }} />
           <div className="relative container mx-auto px-4 text-center space-y-6">
             <EditableText
-              value={landingPage.finalCta?.headline || "هل أنت مستعد للطلب؟"}
+              value={landingPage.finalCta?.headline || t.readyToOrder}
               onChange={v => updateFinalCta({ headline: v })}
               editMode={editMode}
               as="h2"
               className="text-3xl md:text-4xl font-bold"
             />
             <EditableText
-              value={landingPage.finalCta?.subheadline || "لا تفوّت هذا العرض الاستثنائي."}
+              value={landingPage.finalCta?.subheadline || t.dontMiss}
               onChange={v => updateFinalCta({ subheadline: v })}
               editMode={editMode}
               as="p"
@@ -514,7 +564,7 @@ export function LandingPreview() {
         {/* FOOTER */}
         <footer className="py-8 border-t border-border text-center">
           <p className="text-sm text-muted-foreground">
-            © 2024 {product.brand || product.name}. جميع الحقوق محفوظة.
+            {t.allRights(product.brand || product.name)}
           </p>
         </footer>
       </div>
