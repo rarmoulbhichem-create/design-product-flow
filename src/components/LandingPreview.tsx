@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Star, Shield, Zap, Heart, Check, ChevronDown, ChevronUp,
-  Truck, Lock, RefreshCw, Headphones, ArrowLeft, Download,
+  Truck, Lock, RefreshCw, Headphones, ArrowLeft, Download, Save,
   Monitor, Smartphone, Palette, Pencil, Eye, Undo2, Redo2,
   Clock, Flame,
 } from "lucide-react";
