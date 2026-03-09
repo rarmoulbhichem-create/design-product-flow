@@ -1,4 +1,5 @@
 import { useApp } from "@/contexts/AppContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Download, FileCode, Globe, Copy, Check, Archive, Loader2 } from "lucide-react";
@@ -9,6 +10,7 @@ import { saveAs } from "file-saver";
 
 export function ExportPage() {
   const { generatedProject, setCurrentView } = useApp();
+  const { t, dir } = useLanguage();
   const [copied, setCopied] = useState(false);
   const [zipping, setZipping] = useState(false);
 
@@ -255,36 +257,17 @@ footer p { color: #999; font-size: 0.85rem; }
   };
 
   const generateReadme = () => {
-    return `# ${product.name} - صفحة الهبوط
+    return `# ${product.name} - Landing Page
 
-## الملفات
-- \`index.html\` - صفحة الهبوط الرئيسية
-- \`style.css\` - ملف التنسيقات
-- \`images/\` - مجلد الصور
-
-## كيفية الرفع على WordPress
-
-### الطريقة 1: صفحة HTML مخصصة
-1. ارفع مجلد \`images\` إلى مكتبة الوسائط في WordPress
-2. أنشئ صفحة جديدة
-3. أضف كتلة "HTML مخصص"
-4. الصق محتوى \`index.html\`
-5. حدّث روابط الصور
-
-### الطريقة 2: باستخدام Elementor
-1. أنشئ صفحة جديدة بـ Elementor
-2. أضف عنصر HTML
-3. الصق الكود
-4. ارفع الصور واستبدل الروابط
-
-### الطريقة 3: رفع مباشر عبر FTP
-1. ارفع كل الملفات إلى مجلد على سيرفرك
-2. اربط الصفحة من القائمة الرئيسية
+## Files
+- \`index.html\` - Main landing page
+- \`style.css\` - Styles
+- \`images/\` - Images folder
 
 ## SEO
-- **العنوان:** ${seo?.metaTitle}
-- **الوصف:** ${seo?.metaDescription}
-- **الكلمات المفتاحية:** ${(seo?.keywords || []).join(', ')}
+- **Title:** ${seo?.metaTitle}
+- **Description:** ${seo?.metaDescription}
+- **Keywords:** ${(seo?.keywords || []).join(', ')}
 `;
   };
 
@@ -304,12 +287,10 @@ footer p { color: #999; font-size: 0.85rem; }
       const zip = new JSZip();
       const imgFolder = zip.folder("images");
 
-      // Generate HTML & CSS
       zip.file("index.html", generateHTML(false, { local: "true" }));
       zip.file("style.css", generateCSS());
       zip.file("README.md", generateReadme());
 
-      // Download and add images
       const imageUrls = [
         { url: productImageUrl, name: "product-main.jpg" },
         { url: generatedImages?.[0]?.url, name: "product-studio.jpg" },
@@ -328,10 +309,10 @@ footer p { color: #999; font-size: 0.85rem; }
 
       const content = await zip.generateAsync({ type: "blob" });
       saveAs(content, `${product.name.replace(/\s+/g, "-").toLowerCase()}-landing-page.zip`);
-      toast.success("تم تحميل ملف ZIP بنجاح!");
+      toast.success(t.zipDownloadSuccess);
     } catch (err) {
       console.error(err);
-      toast.error("حدث خطأ أثناء إنشاء الملف");
+      toast.error(t.errorCreatingFile);
     } finally {
       setZipping(false);
     }
@@ -341,25 +322,25 @@ footer p { color: #999; font-size: 0.85rem; }
     const fullHTML = generateHTML().replace('<link rel="stylesheet" href="style.css">', `<style>\n${generateCSS()}\n</style>`);
     navigator.clipboard.writeText(fullHTML);
     setCopied(true);
-    toast.success("تم نسخ HTML في الحافظة!");
+    toast.success(t.htmlCopied);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="min-h-screen animate-fade-in" dir="rtl">
+    <div className="min-h-screen animate-fade-in" dir={dir}>
       <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border px-4 py-3 flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={() => setCurrentView("preview")}>
-          <ArrowLeft className="w-4 h-4 ml-1 rotate-180" /> العودة للمعاينة
+          <ArrowLeft className="w-4 h-4 ml-1 rotate-180" /> {t.backToPreview}
         </Button>
-        <h2 className="font-semibold">تصدير WordPress</h2>
+        <h2 className="font-semibold">{t.wordpressExport}</h2>
         <div />
       </div>
 
       <div className="container mx-auto px-4 py-12 max-w-4xl space-y-8">
         <div className="text-center space-y-3">
-          <h1 className="text-3xl font-bold">صدّر صفحة الهبوط</h1>
+          <h1 className="text-3xl font-bold">{t.exportLanding}</h1>
           <p className="text-muted-foreground">
-            حمّل ملف ZIP كامل يحتوي على HTML + CSS + صور جاهز للرفع على WordPress
+            {t.downloadZipDesc}
           </p>
         </div>
 
@@ -369,9 +350,9 @@ footer p { color: #999; font-size: 0.85rem; }
             <div className="w-20 h-20 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center">
               <Archive className="w-10 h-10 text-primary" />
             </div>
-            <h3 className="text-2xl font-bold">تحميل ملف ZIP الكامل</h3>
+            <h3 className="text-2xl font-bold">{t.downloadFullZip}</h3>
             <p className="text-muted-foreground max-w-md mx-auto">
-              يحتوي على index.html + style.css + مجلد الصور + دليل التثبيت على WordPress
+              {t.zipContains}
             </p>
             <div className="flex flex-wrap gap-3 justify-center text-xs text-muted-foreground">
               <span className="bg-muted px-3 py-1 rounded-full">📄 index.html</span>
@@ -386,9 +367,9 @@ footer p { color: #999; font-size: 0.85rem; }
               disabled={zipping}
             >
               {zipping ? (
-                <><Loader2 className="w-5 h-5 ml-2 animate-spin" /> جاري التحضير...</>
+                <><Loader2 className="w-5 h-5 ml-2 animate-spin" /> {t.preparing}</>
               ) : (
-                <><Download className="w-5 h-5 ml-2" /> تحميل ZIP</>
+                <><Download className="w-5 h-5 ml-2" /> {t.downloadZip}</>
               )}
             </Button>
           </CardContent>
@@ -400,12 +381,12 @@ footer p { color: #999; font-size: 0.85rem; }
               <div className="w-14 h-14 mx-auto rounded-2xl bg-accent/10 flex items-center justify-center">
                 {copied ? <Check className="w-7 h-7 text-accent" /> : <Copy className="w-7 h-7 text-accent" />}
               </div>
-              <h3 className="text-lg font-bold">نسخ HTML كامل</h3>
+              <h3 className="text-lg font-bold">{t.copyFullHtml}</h3>
               <p className="text-sm text-muted-foreground">
-                HTML + CSS مدمج في ملف واحد للصق في Elementor أو كتلة HTML
+                {t.htmlCssEmbedded}
               </p>
               <Button variant="outline" className="w-full">
-                {copied ? "✓ تم النسخ" : "نسخ HTML"}
+                {copied ? t.copied : t.copyHtml}
               </Button>
             </CardContent>
           </Card>
@@ -415,19 +396,19 @@ footer p { color: #999; font-size: 0.85rem; }
               <div className="w-14 h-14 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center">
                 <FileCode className="w-7 h-7 text-primary" />
               </div>
-              <h3 className="text-lg font-bold">معلومات SEO</h3>
-              <div className="text-sm text-right space-y-2">
+              <h3 className="text-lg font-bold">SEO</h3>
+              <div className="text-sm text-start space-y-2">
                 <div className="flex justify-between py-1 border-b border-border">
-                  <span className="text-muted-foreground">العنوان</span>
-                  <span className="font-medium max-w-[60%] text-left truncate">{seo?.metaTitle}</span>
+                  <span className="text-muted-foreground">Title</span>
+                  <span className="font-medium max-w-[60%] truncate">{seo?.metaTitle}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-border">
-                  <span className="text-muted-foreground">الوصف</span>
-                  <span className="font-medium max-w-[60%] text-left text-xs">{seo?.metaDescription}</span>
+                  <span className="text-muted-foreground">Description</span>
+                  <span className="font-medium max-w-[60%] text-xs">{seo?.metaDescription}</span>
                 </div>
                 <div className="flex justify-between py-1">
-                  <span className="text-muted-foreground">الكلمات</span>
-                  <span className="font-medium max-w-[60%] text-left text-xs">{seo?.keywords?.join("، ")}</span>
+                  <span className="text-muted-foreground">Keywords</span>
+                  <span className="font-medium max-w-[60%] text-xs">{seo?.keywords?.join(", ")}</span>
                 </div>
               </div>
             </CardContent>
@@ -439,17 +420,24 @@ footer p { color: #999; font-size: 0.85rem; }
           <CardContent className="p-6 space-y-4">
             <h3 className="font-semibold flex items-center gap-2">
               <Globe className="w-5 h-5 text-primary" />
-              دليل الرفع على WordPress
+              {dir === "rtl" ? "دليل الرفع على WordPress" : "Guide d'installation WordPress"}
             </h3>
             <div className="space-y-3 text-sm text-muted-foreground">
-              {[
+              {(dir === "rtl" ? [
                 "حمّل ملف ZIP وفك ضغطه",
                 "ارفع مجلد images/ إلى مكتبة الوسائط في WordPress",
                 "أنشئ صفحة جديدة واختر 'محرر النصوص' أو أضف كتلة 'HTML مخصص'",
                 "الصق محتوى index.html مع تضمين style.css",
                 "حدّث روابط الصور لتشير إلى مكتبة الوسائط",
                 "انشر الصفحة! 🚀",
-              ].map((step, i) => (
+              ] : [
+                "Téléchargez et décompressez le fichier ZIP",
+                "Uploadez le dossier images/ dans la médiathèque WordPress",
+                "Créez une nouvelle page avec un bloc 'HTML personnalisé'",
+                "Collez le contenu de index.html avec style.css inclus",
+                "Mettez à jour les liens des images vers la médiathèque",
+                "Publiez la page ! 🚀",
+              ]).map((step, i) => (
                 <div key={i} className="flex gap-3 items-start">
                   <span className="font-bold text-primary min-w-[24px]">{i + 1}.</span>
                   <p>{step}</p>

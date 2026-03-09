@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import type { LandingTemplate } from "@/types/project";
 import { EditableText } from "./EditableText";
 import { EditableImage } from "./EditableImage";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Star, Shield, Zap, Heart, Check, Truck, Lock, RefreshCw, Headphones,
@@ -92,11 +93,12 @@ function formatPrice(price: number, currency: string) {
 
 export function LandingPreview() {
   const { generatedProject, setCurrentView, setSelectedTemplate, resetApp, updateGeneratedProject, selectedLanguage, undo, redo, canUndo, canRedo } = useApp();
+  const { lang } = useLanguage();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [editMode, setEditMode] = useState(false);
 
-  const t = UI_TEXT[selectedLanguage === "fr" ? "fr" : "ar"];
+  const t = UI_TEXT[lang];
 
   if (!generatedProject) return null;
 

@@ -1,10 +1,19 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sparkles, ArrowRight, Zap, Package, Image, FileCode, Check } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function LandingPage() {
+  const { t, dir } = useLanguage();
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" dir={dir}>
+      {/* Language switcher in header */}
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Background gradient */}
@@ -17,38 +26,35 @@ export default function LandingPage() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm mb-8">
               <Sparkles className="w-4 h-4 text-primary" />
-              <span>Généré par IA en moins de 10 minutes</span>
+              <span>{t.generatedByAI}</span>
             </div>
 
             {/* Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Créez des{" "}
-              <span className="gradient-text">Landing Pages</span>
-              <br />
-              à partir de vos photos produits
+              {t.createLandingPages}{" "}
+              <span className="gradient-text">{t.fromYourPhotos}</span>
             </h1>
 
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Transformez vos images en pages professionnelles optimisées pour la conversion.
-              Export WordPress en un clic.
+              {t.heroSubtitle}
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="btn-gradient gap-2 text-lg">
                 <Link to="/new">
-                  Commencer gratuitement
+                  {t.startFree}
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="text-lg">
-                <Link to="/templates">Voir les exemples</Link>
+                <Link to="/templates">{t.seeExamples}</Link>
               </Button>
             </div>
 
             {/* Social proof */}
             <p className="mt-8 text-sm text-muted-foreground">
-              ✨ Plan gratuit : 1 landing page/mois + 10 images IA
+              {t.freePlanNote}
             </p>
           </div>
         </div>
@@ -58,9 +64,9 @@ export default function LandingPage() {
       <section className="py-20 border-t border-border">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Comment ça marche ?</h2>
+            <h2 className="text-3xl font-bold mb-4">{t.howItWorks}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Un processus simple en 4 étapes pour créer des pages qui convertissent
+              {t.simpleProcess}
             </p>
           </div>
 
@@ -68,23 +74,23 @@ export default function LandingPage() {
             {[
               {
                 icon: Image,
-                title: "1. Uploadez vos photos",
-                description: "Importez jusqu'à 10 photos de votre produit",
+                title: t.step1Title,
+                description: t.step1Desc,
               },
               {
                 icon: Sparkles,
-                title: "2. L'IA génère",
-                description: "Visuels marketing + copywriting automatique",
+                title: t.step2Title,
+                description: t.step2Desc,
               },
               {
                 icon: Package,
-                title: "3. Personnalisez",
-                description: "Ajustez les sections et le contenu",
+                title: t.step3Title,
+                description: t.step3Desc,
               },
               {
                 icon: FileCode,
-                title: "4. Exportez",
-                description: "ZIP ou plugin WordPress prêt à l'emploi",
+                title: t.step4Title,
+                description: t.step4Desc,
               },
             ].map((feature) => (
               <div
@@ -106,17 +112,17 @@ export default function LandingPage() {
       <section className="py-20 bg-secondary/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Tarifs simples</h2>
-            <p className="text-muted-foreground">Commencez gratuitement, évoluez quand vous voulez</p>
+            <h2 className="text-3xl font-bold mb-4">{t.simplePricing}</h2>
+            <p className="text-muted-foreground">{t.startFreeScale}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Free Plan */}
             <div className="p-8 rounded-xl bg-card border border-border">
-              <h3 className="text-xl font-bold mb-2">Gratuit</h3>
+              <h3 className="text-xl font-bold mb-2">{t.free}</h3>
               <p className="text-3xl font-bold mb-4">0€</p>
               <ul className="space-y-3 mb-8">
-                {["1 landing page/mois", "10 images IA", "Export ZIP", "Support communauté"].map(
+                {[t.oneLandingMonth, t.tenAiImages, t.zipExport, t.communitySupport].map(
                   (feature) => (
                     <li key={feature} className="flex items-center gap-2 text-sm">
                       <Check className="w-4 h-4 text-green-500" />
@@ -126,26 +132,26 @@ export default function LandingPage() {
                 )}
               </ul>
               <Button variant="outline" className="w-full" asChild>
-                <Link to="/signup">Commencer</Link>
+                <Link to="/signup">{t.start}</Link>
               </Button>
             </div>
 
             {/* Pro Plan */}
             <div className="p-8 rounded-xl gradient-border bg-card relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-primary-foreground text-xs rounded-full">
-                Populaire
+                {t.popular}
               </div>
-              <h3 className="text-xl font-bold mb-2">Pro</h3>
+              <h3 className="text-xl font-bold mb-2">{t.pro}</h3>
               <p className="text-3xl font-bold mb-4">
-                29€<span className="text-lg text-muted-foreground">/mois</span>
+                29€<span className="text-lg text-muted-foreground">{t.month}</span>
               </p>
               <ul className="space-y-3 mb-8">
                 {[
-                  "Landing pages illimitées",
-                  "500 images IA/mois",
-                  "Export WordPress",
-                  "Styles premium",
-                  "Support prioritaire",
+                  t.unlimitedLandings,
+                  t.fiveHundredImagesMonth,
+                  t.wordpressExportFeature,
+                  t.premiumStyles,
+                  t.prioritySupport,
                 ].map((feature) => (
                   <li key={feature} className="flex items-center gap-2 text-sm">
                     <Check className="w-4 h-4 text-green-500" />
@@ -154,7 +160,7 @@ export default function LandingPage() {
                 ))}
               </ul>
               <Button className="w-full btn-gradient" asChild>
-                <Link to="/signup?plan=pro">Passer à Pro</Link>
+                <Link to="/signup?plan=pro">{t.goToPro}</Link>
               </Button>
             </div>
           </div>
@@ -164,14 +170,14 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Prêt à créer votre landing page ?</h2>
+          <h2 className="text-3xl font-bold mb-4">{t.readyToCreate}</h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            Rejoignez des centaines de créateurs qui génèrent des pages qui convertissent
+            {t.joinCreators}
           </p>
           <Button asChild size="lg" className="btn-gradient gap-2">
             <Link to="/new">
               <Zap className="w-5 h-5" />
-              Créer ma première page
+              {t.createMyFirstPage}
             </Link>
           </Button>
         </div>
@@ -186,13 +192,13 @@ export default function LandingPage() {
           </div>
           <div className="flex gap-6 text-sm text-muted-foreground">
             <Link to="/terms" className="hover:text-foreground transition-colors">
-              Mentions légales
+              {t.legalNotice}
             </Link>
             <Link to="/privacy" className="hover:text-foreground transition-colors">
-              Confidentialité
+              {t.privacy}
             </Link>
             <Link to="/contact" className="hover:text-foreground transition-colors">
-              Contact
+              {t.contact}
             </Link>
           </div>
         </div>

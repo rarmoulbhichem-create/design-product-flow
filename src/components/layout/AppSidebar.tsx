@@ -24,34 +24,40 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-const MAIN_NAV = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Mes Projets", url: "/projects", icon: FolderOpen },
-  { title: "Templates", url: "/templates", icon: LayoutTemplate },
-];
-
-const SECONDARY_NAV = [
-  { title: "Paramètres", url: "/settings", icon: Settings },
-  { title: "Aide", url: "/help", icon: HelpCircle },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export function AppSidebar() {
   const location = useLocation();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const { t, dir } = useLanguage();
+
+  const MAIN_NAV = [
+    { title: t.dashboard, url: "/dashboard", icon: LayoutDashboard },
+    { title: t.myProjects, url: "/projects", icon: FolderOpen },
+    { title: t.templates, url: "/templates", icon: LayoutTemplate },
+  ];
+
+  const SECONDARY_NAV = [
+    { title: t.settings, url: "/settings", icon: Settings },
+    { title: t.help, url: "/help", icon: HelpCircle },
+  ];
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
-        <Link to="/" className="flex items-center gap-2 px-2 py-3">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-primary-foreground" />
-          </div>
-          {!collapsed && (
-            <span className="font-bold text-lg gradient-text">LandPage AI</span>
-          )}
-        </Link>
+        <div className="flex items-center justify-between px-2 py-3">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-primary-foreground" />
+            </div>
+            {!collapsed && (
+              <span className="font-bold text-lg gradient-text">LandPage AI</span>
+            )}
+          </Link>
+          {!collapsed && <LanguageSwitcher />}
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
@@ -60,14 +66,14 @@ export function AppSidebar() {
           <Button asChild className="w-full btn-gradient gap-2 justify-start">
             <Link to="/new">
               <Plus className="w-4 h-4" />
-              {!collapsed && "Nouveau projet"}
+              {!collapsed && t.newProject}
             </Link>
           </Button>
         </div>
 
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>{t.navigation}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {MAIN_NAV.map((item) => {
@@ -95,7 +101,7 @@ export function AppSidebar() {
 
         {/* Secondary Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel>Autres</SidebarGroupLabel>
+          <SidebarGroupLabel>{t.other}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {SECONDARY_NAV.map((item) => {
@@ -122,13 +128,13 @@ export function AppSidebar() {
           <div className="rounded-lg bg-sidebar-accent p-3">
             <div className="flex items-center gap-2 mb-2">
               <Crown className="w-4 h-4 text-yellow-500" />
-              <span className="font-medium text-sm">Plan Gratuit</span>
+              <span className="font-medium text-sm">{t.freePlan}</span>
             </div>
             <p className="text-xs text-muted-foreground mb-3">
-              1/1 landing page ce mois
+              1/1 {t.landingsThisMonth}
             </p>
             <Button variant="outline" size="sm" className="w-full" asChild>
-              <Link to="/upgrade">Passer à Pro</Link>
+              <Link to="/upgrade">{t.upgradeToPro}</Link>
             </Button>
           </div>
         )}
