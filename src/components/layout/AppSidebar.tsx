@@ -134,7 +134,7 @@ export function AppSidebar() {
               1/1 {t.landingsThisMonth}
             </p>
             <Button variant="outline" size="sm" className="w-full" asChild>
-              <Link to="/#pricing">{t.upgradeToPro}</Link>
+              <Link to="/upgrade">{t.upgradeToPro}</Link>
             </Button>
           </div>
         )}
