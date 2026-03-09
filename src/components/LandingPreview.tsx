@@ -149,8 +149,8 @@ export function LandingPreview() {
   const detailImage = generatedImages[1]?.url || productImageUrl;
   const currency = pricing?.currency || "DZD";
 
-  const primaryColor = tmpl.overrideColors?.primary || design?.primaryColor || "#7c3aed";
-  const accentColor = tmpl.overrideColors?.accent || design?.accentColor || "#06b6d4";
+  const primaryColor = generatedProject.storeSettings?.customPrimaryColor || tmpl.overrideColors?.primary || design?.primaryColor || "#7c3aed";
+  const accentColor = generatedProject.storeSettings?.customAccentColor || tmpl.overrideColors?.accent || design?.accentColor || "#06b6d4";
 
   // Helpers for updating nested fields
   const updateProduct = (patch: Partial<typeof product>) =>
@@ -243,7 +243,35 @@ export function LandingPreview() {
               <DialogHeader>
                 <DialogTitle>{lang === "fr" ? "Paramètres du projet" : "إعدادات المشروع"}</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 pt-2">
+              <div className="space-y-5 pt-2 max-h-[60vh] overflow-y-auto pr-1">
+                {/* Store Name */}
+                <div className="space-y-2">
+                  <Label>{lang === "fr" ? "Nom de la boutique" : "اسم المتجر"}</Label>
+                  <Input
+                    placeholder={lang === "fr" ? "Ex: Ma Boutique DZ" : "مثال: متجري"}
+                    value={generatedProject.storeSettings?.storeName || ""}
+                    onChange={e => updateGeneratedProject(p => ({ ...p, storeSettings: { ...p.storeSettings, storeName: e.target.value } }))}
+                  />
+                </div>
+
+                {/* Store Logo */}
+                <div className="space-y-2">
+                  <Label>{lang === "fr" ? "Logo de la boutique (URL)" : "شعار المتجر (رابط)"}</Label>
+                  <Input
+                    placeholder="https://example.com/logo.png"
+                    value={generatedProject.storeSettings?.logoUrl || ""}
+                    onChange={e => updateGeneratedProject(p => ({ ...p, storeSettings: { ...p.storeSettings, logoUrl: e.target.value } }))}
+                    dir="ltr"
+                  />
+                  {generatedProject.storeSettings?.logoUrl && (
+                    <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
+                      <img src={generatedProject.storeSettings.logoUrl} alt="Logo" className="w-10 h-10 object-contain rounded" onError={e => (e.currentTarget.style.display = "none")} />
+                      <span className="text-xs text-muted-foreground">{lang === "fr" ? "Aperçu du logo" : "معاينة الشعار"}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* WhatsApp */}
                 <div className="space-y-2">
                   <Label>{lang === "fr" ? "Numéro WhatsApp du vendeur" : "رقم WhatsApp للبائع"}</Label>
                   <Input
@@ -254,9 +282,105 @@ export function LandingPreview() {
                   />
                   <p className="text-xs text-muted-foreground">
                     {lang === "fr"
-                      ? "Inclure l'indicatif pays (ex: +213 pour l'Algérie). Les clients seront redirigés vers ce numéro."
-                      : "أضف رمز البلد (مثال: 213+ للجزائر). سيتم توجيه العملاء إلى هذا الرقم."}
+                      ? "Inclure l'indicatif pays (ex: +213 pour l'Algérie)."
+                      : "أضف رمز البلد (مثال: 213+ للجزائر)."}
                   </p>
+                </div>
+
+                {/* Custom Colors */}
+                <div className="space-y-2">
+                  <Label className="font-semibold">{lang === "fr" ? "Couleurs personnalisées" : "ألوان مخصصة"}</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">{lang === "fr" ? "Couleur principale" : "اللون الرئيسي"}</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={generatedProject.storeSettings?.customPrimaryColor || design?.primaryColor || "#7c3aed"}
+                          onChange={e => updateGeneratedProject(p => ({ ...p, storeSettings: { ...p.storeSettings, customPrimaryColor: e.target.value } }))}
+                          className="w-8 h-8 rounded cursor-pointer border border-border"
+                        />
+                        <Input
+                          value={generatedProject.storeSettings?.customPrimaryColor || ""}
+                          onChange={e => updateGeneratedProject(p => ({ ...p, storeSettings: { ...p.storeSettings, customPrimaryColor: e.target.value } }))}
+                          placeholder={design?.primaryColor || "#7c3aed"}
+                          className="text-xs h-8"
+                          dir="ltr"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">{lang === "fr" ? "Couleur d'accent" : "لون التمييز"}</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={generatedProject.storeSettings?.customAccentColor || design?.accentColor || "#06b6d4"}
+                          onChange={e => updateGeneratedProject(p => ({ ...p, storeSettings: { ...p.storeSettings, customAccentColor: e.target.value } }))}
+                          className="w-8 h-8 rounded cursor-pointer border border-border"
+                        />
+                        <Input
+                          value={generatedProject.storeSettings?.customAccentColor || ""}
+                          onChange={e => updateGeneratedProject(p => ({ ...p, storeSettings: { ...p.storeSettings, customAccentColor: e.target.value } }))}
+                          placeholder={design?.accentColor || "#06b6d4"}
+                          className="text-xs h-8"
+                          dir="ltr"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">{lang === "fr" ? "Arrière-plan" : "لون الخلفية"}</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={generatedProject.storeSettings?.customBackgroundColor || "#ffffff"}
+                          onChange={e => updateGeneratedProject(p => ({ ...p, storeSettings: { ...p.storeSettings, customBackgroundColor: e.target.value } }))}
+                          className="w-8 h-8 rounded cursor-pointer border border-border"
+                        />
+                        <Input
+                          value={generatedProject.storeSettings?.customBackgroundColor || ""}
+                          onChange={e => updateGeneratedProject(p => ({ ...p, storeSettings: { ...p.storeSettings, customBackgroundColor: e.target.value } }))}
+                          placeholder="#ffffff"
+                          className="text-xs h-8"
+                          dir="ltr"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">{lang === "fr" ? "Texte" : "لون النص"}</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={generatedProject.storeSettings?.customTextColor || "#1a1a1a"}
+                          onChange={e => updateGeneratedProject(p => ({ ...p, storeSettings: { ...p.storeSettings, customTextColor: e.target.value } }))}
+                          className="w-8 h-8 rounded cursor-pointer border border-border"
+                        />
+                        <Input
+                          value={generatedProject.storeSettings?.customTextColor || ""}
+                          onChange={e => updateGeneratedProject(p => ({ ...p, storeSettings: { ...p.storeSettings, customTextColor: e.target.value } }))}
+                          placeholder="#1a1a1a"
+                          className="text-xs h-8"
+                          dir="ltr"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => updateGeneratedProject(p => ({
+                      ...p,
+                      storeSettings: {
+                        ...p.storeSettings,
+                        customPrimaryColor: undefined,
+                        customAccentColor: undefined,
+                        customBackgroundColor: undefined,
+                        customTextColor: undefined,
+                      }
+                    }))}
+                  >
+                    {lang === "fr" ? "Réinitialiser les couleurs" : "إعادة تعيين الألوان"}
+                  </Button>
                 </div>
               </div>
             </DialogContent>

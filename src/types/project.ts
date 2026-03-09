@@ -101,6 +101,15 @@ export interface GeneratedImage {
   prompt: string;
 }
 
+export interface StoreSettings {
+  storeName?: string;
+  logoUrl?: string;
+  customPrimaryColor?: string;
+  customAccentColor?: string;
+  customBackgroundColor?: string;
+  customTextColor?: string;
+}
+
 export interface GeneratedProject {
   product: ProductData;
   pricing: PricingData;
@@ -111,6 +120,7 @@ export interface GeneratedProject {
   generatedImages: GeneratedImage[];
   template: LandingTemplate;
   whatsappNumber?: string;
+  storeSettings?: StoreSettings;
 }
 
 export type LandingTemplate = "elegant" | "bold" | "minimal" | "suspended" | "luxury" | "fashion" | "tech" | "flashsale" | "neon" | "editorial";
