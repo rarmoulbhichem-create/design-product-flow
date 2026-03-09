@@ -80,7 +80,7 @@ export function ExportPage() {
       <div class="grid-3">
         ${(landingPage.benefits || []).map(b => `
         <div class="card">
-          <div class="card-icon">${b.icon || '⭐'}</div>
+          <div class="card-icon">${mapIconToEmoji(b.icon)}</div>
           <h3>${b.title}</h3>
           <p>${b.description}</p>
         </div>`).join('')}
