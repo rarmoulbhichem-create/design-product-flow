@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Star, Shield, Zap, Heart, Check, ChevronDown, ChevronUp,
   Truck, Lock, RefreshCw, Headphones, ArrowLeft, Download,
-  Monitor, Smartphone, Palette, Pencil, Eye,
+  Monitor, Smartphone, Palette, Pencil, Eye, Undo2, Redo2,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -91,7 +91,7 @@ function formatPrice(price: number, currency: string) {
 }
 
 export function LandingPreview() {
-  const { generatedProject, setCurrentView, setSelectedTemplate, resetApp, updateGeneratedProject, selectedLanguage } = useApp();
+  const { generatedProject, setCurrentView, setSelectedTemplate, resetApp, updateGeneratedProject, selectedLanguage, undo, redo, canUndo, canRedo } = useApp();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [editMode, setEditMode] = useState(false);
@@ -171,6 +171,32 @@ export function LandingPreview() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* Undo/Redo buttons */}
+          {editMode && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={undo}
+                disabled={!canUndo}
+                className="gap-1"
+                title="Undo"
+              >
+                <Undo2 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={redo}
+                disabled={!canRedo}
+                className="gap-1"
+                title="Redo"
+              >
+                <Redo2 className="w-4 h-4" />
+              </Button>
+              <div className="h-6 w-px bg-border" />
+            </>
+          )}
           {/* Edit mode toggle */}
           <Button
             variant={editMode ? "default" : "outline"}
