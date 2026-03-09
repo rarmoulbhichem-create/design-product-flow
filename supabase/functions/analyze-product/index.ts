@@ -43,60 +43,84 @@ serve(async (req) => {
       ? `السعر المحدد من المستخدم: ${userPrice} دج (دينار جزائري). استخدم هذا السعر بالضبط. اقترح سعراً أصلياً أعلى لإظهار الخصم.`
       : `قدّر سعراً واقعياً بالدينار الجزائري (DZD).`;
 
+    // Language instructions
+    const langInstructions = {
+      ar: {
+        contentLang: "كل المحتوى باللغة العربية الفصحى الحديثة (الأسلوب الجزائري).",
+        testimonialNames: "استخدم أسماء وألقاب جزائرية ومدن جزائرية حقيقية.",
+        direction: "rtl",
+      },
+      fr: {
+        contentLang: "Tout le contenu doit être en français algérien (style local). Utilisez un français naturel avec des expressions courantes en Algérie.",
+        testimonialNames: "Utilisez des prénoms et noms algériens courants et des villes algériennes réelles.",
+        direction: "ltr",
+      },
+      both: {
+        contentLang: "Créez le contenu en DEUX langues : arabe algérien ET français algérien. Pour chaque champ texte, fournissez d'abord la version arabe. La structure JSON reste la même mais le contenu principal sera en arabe, avec une section supplémentaire 'frenchVersion' contenant la traduction française de tout le contenu.",
+        testimonialNames: "Mélangez des prénoms arabes et français typiquement algériens avec des villes algériennes.",
+        direction: "rtl",
+      },
+    };
+
+    const lang = langInstructions[language as keyof typeof langInstructions] || langInstructions.ar;
+
     const systemPrompt = `أنت خبير عالمي في التجارة الإلكترونية والتسويق الرقمي وكتابة المحتوى التحويلي.
 
 مهمتك: حلل صور المنتج هذه بدقة متناهية.
 
+## تعليمات اللغة:
+${lang.contentLang}
+${lang.testimonialNames}
+
 ## تعليمات حاسمة:
-1. **تعرّف على المنتج الحقيقي بالضبط** - ابحث في ذاكرتك عن هذا المنتج تحديداً. حدد الاسم الدقيق، العلامة التجارية الحقيقية، والموديل إن أمكن. لا تخمن - حدد المنتج كما هو في الصور.
-2. **إذا كانت هناك عدة صور، ادمج المعلومات من كلها** - كل صورة تعطيك زاوية أو تفاصيل إضافية. استخدم الكل لبناء صورة كاملة ودقيقة عن المنتج.
-3. **المحتوى يجب أن يصف هذا المنتج بالتحديد** وليس منتجاً مشابهاً. كل وصف يجب أن يتطابق مع ما تراه في الصور.
-4. **كل المحتوى باللغة العربية** - العناوين، الأوصاف، الشهادات، الأسئلة الشائعة، كل شيء بالعربية الفصحى الحديثة.
-5. **العملة: دينار جزائري (دج)** - ${priceInstruction}
-6. **الشهادات بأسماء جزائرية** - استخدم أسماء وألقاب جزائرية ومدن جزائرية حقيقية.
+1. **تعرّف على المنتج الحقيقي بالضبط** - ابحث في ذاكرتك عن هذا المنتج تحديداً. حدد الاسم الدقيق، العلامة التجارية الحقيقية، والموديل إن أمكن.
+2. **إذا كانت هناك عدة صور، ادمج المعلومات من كلها** - كل صورة تعطيك زاوية أو تفاصيل إضافية.
+3. **المحتوى يجب أن يصف هذا المنتج بالتحديد** وليس منتجاً مشابهاً.
+4. **العملة: دينار جزائري (DZD / دج)** - ${priceInstruction}
+5. **الشهادات بأسماء جزائرية** - ${lang.testimonialNames}
 
 أجب فقط بكائن JSON صالح، بدون markdown، بدون backticks:
 
 {
   "product": {
-    "name": "الاسم الحقيقي الكامل للمنتج بالعربية",
-    "brand": "العلامة التجارية الحقيقية",
-    "category": "الفئة الرئيسية",
-    "subcategory": "الفئة الفرعية",
-    "shortDescription": "وصف قصير جذاب بجملة واحدة",
-    "longDescription": "وصف مفصل 150-200 كلمة، مقنع وموجه لفوائد العميل",
-    "targetAudience": "وصف دقيق للجمهور المستهدف",
+    "name": "${language === "fr" ? "Nom complet et réel du produit" : "الاسم الحقيقي الكامل للمنتج"}",
+    "brand": "${language === "fr" ? "Marque réelle" : "العلامة التجارية الحقيقية"}",
+    "category": "${language === "fr" ? "Catégorie principale" : "الفئة الرئيسية"}",
+    "subcategory": "${language === "fr" ? "Sous-catégorie" : "الفئة الفرعية"}",
+    "shortDescription": "${language === "fr" ? "Description courte accrocheuse en une phrase" : "وصف قصير جذاب بجملة واحدة"}",
+    "longDescription": "${language === "fr" ? "Description détaillée 150-200 mots, persuasive et orientée bénéfices client" : "وصف مفصل 150-200 كلمة، مقنع وموجه لفوائد العميل"}",
+    "targetAudience": "${language === "fr" ? "Description précise du public cible" : "وصف دقيق للجمهور المستهدف"}",
     "specifications": [
-      {"label": "المادة", "value": "القيمة"},
-      {"label": "الأبعاد", "value": "القيمة"},
-      {"label": "الوزن", "value": "القيمة"},
-      {"label": "اللون", "value": "القيمة"},
-      {"label": "الضمان", "value": "القيمة"}
+      {"label": "${language === "fr" ? "Matériau" : "المادة"}", "value": "..."},
+      {"label": "${language === "fr" ? "Dimensions" : "الأبعاد"}", "value": "..."},
+      {"label": "${language === "fr" ? "Poids" : "الوزن"}", "value": "..."},
+      {"label": "${language === "fr" ? "Couleur" : "اللون"}", "value": "..."},
+      {"label": "${language === "fr" ? "Garantie" : "الضمان"}", "value": "..."}
     ],
-    "tags": ["وسم1", "وسم2", "وسم3", "وسم4", "وسم5"]
+    "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"]
   },
   "pricing": {
     "price": 7999,
     "originalPrice": 12999,
     "currency": "DZD",
     "discountPercent": 38,
-    "shippingInfo": "توصيل مجاني خلال 3-5 أيام لكل الولايات",
-    "guarantee": "ضمان استرداد المال خلال 30 يوم"
+    "shippingInfo": "${language === "fr" ? "Livraison gratuite sous 3-5 jours dans toutes les wilayas" : "توصيل مجاني خلال 3-5 أيام لكل الولايات"}",
+    "guarantee": "${language === "fr" ? "Garantie satisfait ou remboursé sous 30 jours" : "ضمان استرداد المال خلال 30 يوم"}"
   },
   "landingPage": {
     "hero": {
-      "headline": "عنوان قوي وجذاب (6-8 كلمات)",
-      "subheadline": "عنوان فرعي مقنع يشرح الفائدة الرئيسية (25 كلمة كحد أقصى)",
-      "ctaText": "اطلب الآن",
-      "ctaSubtext": "⚡ عرض محدود - متبقي 12 قطعة فقط",
-      "badge": "تخفيض -38%"
+      "headline": "${language === "fr" ? "Titre accrocheur puissant (6-8 mots)" : "عنوان قوي وجذاب (6-8 كلمات)"}",
+      "subheadline": "${language === "fr" ? "Sous-titre convaincant expliquant le bénéfice principal (25 mots max)" : "عنوان فرعي مقنع يشرح الفائدة الرئيسية (25 كلمة كحد أقصى)"}",
+      "ctaText": "${language === "fr" ? "Commander maintenant" : "اطلب الآن"}",
+      "ctaSubtext": "${language === "fr" ? "⚡ Offre limitée - Plus que 12 pièces" : "⚡ عرض محدود - متبقي 12 قطعة فقط"}",
+      "badge": "${language === "fr" ? "Promo -38%" : "تخفيض -38%"}"
     },
-    "trustBadges": ["توصيل مجاني", "دفع آمن", "ضمان 30 يوم", "دعم 24/7"],
+    "trustBadges": ["${language === "fr" ? "Livraison gratuite" : "توصيل مجاني"}", "${language === "fr" ? "Paiement sécurisé" : "دفع آمن"}", "${language === "fr" ? "Garantie 30 jours" : "ضمان 30 يوم"}", "${language === "fr" ? "Support 24/7" : "دعم 24/7"}"],
     "benefits": [
-      {"icon": "⭐", "title": "عنوان الميزة", "description": "وصف الميزة"},
-      {"icon": "🛡️", "title": "عنوان الميزة", "description": "وصف الميزة"},
-      {"icon": "⚡", "title": "عنوان الميزة", "description": "وصف الميزة"},
-      {"icon": "💎", "title": "عنوان الميزة", "description": "وصف الميزة"}
+      {"icon": "Star", "title": "...", "description": "..."},
+      {"icon": "Shield", "title": "...", "description": "..."},
+      {"icon": "Zap", "title": "...", "description": "..."},
+      {"icon": "Heart", "title": "...", "description": "..."}
     ],
     "socialProof": {
       "rating": 4.8,
@@ -104,43 +128,43 @@ serve(async (req) => {
       "satisfactionRate": 98
     },
     "testimonials": [
-      {"name": "سارة ب.", "location": "الجزائر العاصمة", "rating": 5, "text": "شهادة واقعية وإيجابية", "verified": true, "date": "منذ 3 أيام"},
-      {"name": "محمد ل.", "location": "وهران", "rating": 5, "text": "شهادة واقعية وإيجابية", "verified": true, "date": "منذ أسبوع"},
-      {"name": "أمينة د.", "location": "قسنطينة", "rating": 4, "text": "شهادة واقعية وإيجابية", "verified": true, "date": "منذ أسبوعين"},
-      {"name": "كريم ر.", "location": "سطيف", "rating": 5, "text": "شهادة واقعية وإيجابية", "verified": true, "date": "منذ 3 أسابيع"}
+      {"name": "${language === "fr" ? "Sarah B." : "سارة ب."}", "location": "${language === "fr" ? "Alger" : "الجزائر العاصمة"}", "rating": 5, "text": "...", "verified": true, "date": "${language === "fr" ? "Il y a 3 jours" : "منذ 3 أيام"}"},
+      {"name": "${language === "fr" ? "Mohamed L." : "محمد ل."}", "location": "${language === "fr" ? "Oran" : "وهران"}", "rating": 5, "text": "...", "verified": true, "date": "${language === "fr" ? "Il y a 1 semaine" : "منذ أسبوع"}"},
+      {"name": "${language === "fr" ? "Amina D." : "أمينة د."}", "location": "${language === "fr" ? "Constantine" : "قسنطينة"}", "rating": 4, "text": "...", "verified": true, "date": "${language === "fr" ? "Il y a 2 semaines" : "منذ أسبوعين"}"},
+      {"name": "${language === "fr" ? "Karim R." : "كريم ر."}", "location": "${language === "fr" ? "Sétif" : "سطيف"}", "rating": 5, "text": "...", "verified": true, "date": "${language === "fr" ? "Il y a 3 semaines" : "منذ 3 أسابيع"}"}
     ],
     "features": [
-      {"title": "ميزة 1", "description": "شرح مفصل"},
-      {"title": "ميزة 2", "description": "شرح مفصل"},
-      {"title": "ميزة 3", "description": "شرح مفصل"},
-      {"title": "ميزة 4", "description": "شرح مفصل"},
-      {"title": "ميزة 5", "description": "شرح مفصل"},
-      {"title": "ميزة 6", "description": "شرح مفصل"}
+      {"title": "...", "description": "..."},
+      {"title": "...", "description": "..."},
+      {"title": "...", "description": "..."},
+      {"title": "...", "description": "..."},
+      {"title": "...", "description": "..."},
+      {"title": "...", "description": "..."}
     ],
     "faq": [
-      {"question": "سؤال شائع 1", "answer": "إجابة مفصلة ومطمئنة"},
-      {"question": "سؤال شائع 2", "answer": "إجابة مفصلة ومطمئنة"},
-      {"question": "سؤال شائع 3", "answer": "إجابة مفصلة ومطمئنة"},
-      {"question": "سؤال شائع 4", "answer": "إجابة مفصلة ومطمئنة"},
-      {"question": "سؤال شائع 5", "answer": "إجابة مفصلة ومطمئنة"}
+      {"question": "...", "answer": "..."},
+      {"question": "...", "answer": "..."},
+      {"question": "...", "answer": "..."},
+      {"question": "...", "answer": "..."},
+      {"question": "...", "answer": "..."}
     ],
     "urgency": {
-      "text": "⏰ عرض خاص محدود",
-      "subtext": "هذا العرض ينتهي قريباً. لا تفوت هذه الفرصة الفريدة.",
-      "stockText": "متبقي 12 قطعة فقط في المخزون"
+      "text": "${language === "fr" ? "⏰ Offre spéciale limitée" : "⏰ عرض خاص محدود"}",
+      "subtext": "${language === "fr" ? "Cette offre expire bientôt. Ne manquez pas cette opportunité unique." : "هذا العرض ينتهي قريباً. لا تفوت هذه الفرصة الفريدة."}",
+      "stockText": "${language === "fr" ? "Plus que 12 pièces en stock" : "متبقي 12 قطعة فقط في المخزون"}"
     },
     "finalCta": {
-      "headline": "عنوان نهائي مقنع",
-      "subheadline": "عنوان فرعي يخلق إحساساً بالإلحاح",
-      "buttonText": "احصل عليه الآن",
-      "guaranteeText": "ضمان استرداد المال خلال 30 يوم"
+      "headline": "...",
+      "subheadline": "...",
+      "buttonText": "${language === "fr" ? "Obtenez-le maintenant" : "احصل عليه الآن"}",
+      "guaranteeText": "${language === "fr" ? "Garantie satisfait ou remboursé sous 30 jours" : "ضمان استرداد المال خلال 30 يوم"}"
     }
   },
   "seo": {
-    "metaTitle": "عنوان SEO محسّن (60 حرف كحد أقصى)",
-    "metaDescription": "وصف ميتا مقنع (160 حرف كحد أقصى)",
-    "h1": "عنوان H1 رئيسي مع كلمة مفتاحية",
-    "keywords": ["كلمة1", "كلمة2", "كلمة3", "كلمة4", "كلمة5"]
+    "metaTitle": "SEO optimized title (60 chars max)",
+    "metaDescription": "Compelling meta description (160 chars max)",
+    "h1": "Main H1 with keyword",
+    "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
   },
   "design": {
     "primaryColor": "#hex",
@@ -149,7 +173,11 @@ serve(async (req) => {
     "backgroundColor": "#0a0a0f",
     "textColor": "#ffffff",
     "mood": "premium"
-  }
+  }${language === "both" ? `,
+  "frenchVersion": {
+    "product": { "name": "...", "shortDescription": "...", "longDescription": "...", "specifications": [...] },
+    "landingPage": { "hero": { "headline": "...", "subheadline": "...", "ctaText": "...", "ctaSubtext": "...", "badge": "..." }, "trustBadges": [...], "benefits": [...], "testimonials": [...], "features": [...], "faq": [...], "urgency": {...}, "finalCta": {...} }
+  }` : ""}
 }`;
 
     const userMessage: any[] = [
