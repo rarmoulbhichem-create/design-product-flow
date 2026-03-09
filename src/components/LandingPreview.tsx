@@ -1,11 +1,12 @@
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
+import { useProjects } from "@/hooks/useProjects";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Star, Shield, Zap, Heart, Check, ChevronDown, ChevronUp,
-  Truck, Lock, RefreshCw, Headphones, ArrowLeft, Download,
+  Truck, Lock, RefreshCw, Headphones, ArrowLeft, Download, Save,
   Monitor, Smartphone, Palette, Pencil, Eye, Undo2, Redo2,
   Clock, Flame,
 } from "lucide-react";
@@ -123,11 +124,18 @@ function CountdownTimer() {
 export function LandingPreview() {
   const { generatedProject, setCurrentView, setSelectedTemplate, resetApp, updateGeneratedProject, selectedLanguage, undo, redo, canUndo, canRedo } = useApp();
   const { lang } = useLanguage();
+  const { saveProject } = useProjects();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [editMode, setEditMode] = useState(false);
+  const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
 
   const t = UI_TEXT[lang];
+  const handleSave = async () => {
+    if (!generatedProject) return;
+    const id = await saveProject(generatedProject, undefined, savedProjectId || undefined);
+    if (id) setSavedProjectId(id);
+  };
 
   if (!generatedProject) return null;
 
@@ -222,6 +230,9 @@ export function LandingPreview() {
               <Smartphone className="w-4 h-4" />
             </Button>
           </div>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleSave}>
+            <Save className="w-4 h-4" /> {lang === "fr" ? "Sauvegarder" : "حفظ"}
+          </Button>
           <Button className="btn-gradient gap-2" size="sm" onClick={() => setCurrentView("export")}>
             <Download className="w-4 h-4" /> {t.export}
           </Button>
