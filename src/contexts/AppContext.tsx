@@ -139,6 +139,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       clearProductImages,
       setProductImage,
       setUserPrice,
+      setSelectedLanguage,
       setIsGenerating,
       setGenerationProgress,
       setGenerationStep,
