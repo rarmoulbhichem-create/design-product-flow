@@ -16,7 +16,8 @@ export function ExportPage() {
 
   if (!generatedProject) return null;
 
-  const { product, pricing, landingPage, design, seo, productImageUrl, generatedImages } = generatedProject;
+  const { product, pricing, landingPage, design, seo, productImageUrl, generatedImages, whatsappNumber } = generatedProject;
+  const waPhone = (whatsappNumber || "").replace(/[^0-9]/g, "");
 
   const ICON_EMOJI_MAP: Record<string, string> = {
     Star: '⭐', Shield: '🛡️', Zap: '⚡', Heart: '❤️', Check: '✅',
