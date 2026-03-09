@@ -124,7 +124,6 @@ export function LandingPreview() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [editMode, setEditMode] = useState(false);
-  const [showAllTemplates, setShowAllTemplates] = useState(false);
 
   const t = UI_TEXT[lang];
 
