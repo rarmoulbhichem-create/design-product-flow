@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
-import { GeneratedProject, LandingTemplate } from "@/types/project";
+import { GeneratedProject, LandingTemplate, LandingLanguage } from "@/types/project";
 
 interface UploadedProductImage {
   url: string;
