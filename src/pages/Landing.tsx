@@ -232,9 +232,32 @@ export default function LandingPage() {
             </div>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Starter */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {/* Free */}
             <ScrollReveal delay={0}>
+              <div id="free-plan" className="p-8 rounded-2xl bg-card border-2 border-primary/50 hover:border-primary transition-all h-full relative">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
+                  {t.free}
+                </div>
+                <h3 className="text-xl font-bold mb-2">{t.free}</h3>
+                <p className="text-3xl font-bold mb-6">
+                  {t.freePrice}<span className="text-lg text-muted-foreground">{t.month}</span>
+                </p>
+                <ul className="space-y-3 mb-8">
+                  {[t.freeFeature1, t.freeFeature2, t.freeFeature3].map(f => (
+                    <li key={f} className="flex items-center gap-2 text-sm">
+                      <Check className="w-4 h-4 text-green-500 shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
+                <Button className="w-full btn-gradient" asChild>
+                  <Link to="/new">{t.startFreeNow}</Link>
+                </Button>
+              </div>
+            </ScrollReveal>
+
+            {/* Starter */}
+            <ScrollReveal delay={0.1}>
               <div className="p-8 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all h-full">
                 <h3 className="text-xl font-bold mb-2">{t.starter}</h3>
                 <p className="text-3xl font-bold mb-6">
@@ -254,7 +277,7 @@ export default function LandingPage() {
             </ScrollReveal>
 
             {/* Pro */}
-            <ScrollReveal delay={0.1}>
+            <ScrollReveal delay={0.2}>
               <div className="p-8 rounded-2xl gradient-border bg-card relative h-full">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full">
                   {t.popular}
@@ -277,7 +300,7 @@ export default function LandingPage() {
             </ScrollReveal>
 
             {/* Enterprise */}
-            <ScrollReveal delay={0.2}>
+            <ScrollReveal delay={0.3}>
               <div className="p-8 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all h-full">
                 <h3 className="text-xl font-bold mb-2">{t.enterprise}</h3>
                 <p className="text-2xl font-bold mb-6">{t.enterprisePrice}</p>
