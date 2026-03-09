@@ -1,12 +1,16 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import { GeneratedProject, LandingTemplate } from "@/types/project";
 
+interface UploadedProductImage {
+  url: string;
+  base64: string;
+  file?: File;
+}
+
 interface AppState {
   currentView: "upload" | "price" | "generating" | "preview" | "export";
   generatedProject: GeneratedProject | null;
-  productImageUrl: string | null;
-  productImageBase64: string | null;
-  productFile: File | null;
+  productImages: UploadedProductImage[];
   userPrice: string;
   isGenerating: boolean;
   generationProgress: number;
@@ -17,21 +21,25 @@ interface AppState {
 interface AppContextType extends AppState {
   setCurrentView: (view: AppState["currentView"]) => void;
   setGeneratedProject: (project: GeneratedProject | null) => void;
-  setProductImage: (url: string, base64: string, file?: File) => void;
+  addProductImage: (url: string, base64: string, file?: File) => void;
+  removeProductImage: (index: number) => void;
+  clearProductImages: () => void;
   setUserPrice: (price: string) => void;
   setIsGenerating: (val: boolean) => void;
   setGenerationProgress: (val: number) => void;
   setGenerationStep: (val: string) => void;
   setSelectedTemplate: (template: LandingTemplate) => void;
   resetApp: () => void;
+  // Legacy compat
+  productImageUrl: string | null;
+  productImageBase64: string | null;
+  setProductImage: (url: string, base64: string, file?: File) => void;
 }
 
 const initialState: AppState = {
   currentView: "upload",
   generatedProject: null,
-  productImageUrl: null,
-  productImageBase64: null,
-  productFile: null,
+  productImages: [],
   userPrice: "",
   isGenerating: false,
   generationProgress: 0,
@@ -52,8 +60,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, generatedProject }));
   }, []);
 
+  const addProductImage = useCallback((url: string, base64: string, file?: File) => {
+    setState(prev => ({
+      ...prev,
+      productImages: [...prev.productImages, { url, base64, file }],
+    }));
+  }, []);
+
+  const removeProductImage = useCallback((index: number) => {
+    setState(prev => ({
+      ...prev,
+      productImages: prev.productImages.filter((_, i) => i !== index),
+    }));
+  }, []);
+
+  const clearProductImages = useCallback(() => {
+    setState(prev => ({ ...prev, productImages: [] }));
+  }, []);
+
+  // Legacy compat
   const setProductImage = useCallback((url: string, base64: string, file?: File) => {
-    setState(prev => ({ ...prev, productImageUrl: url, productImageBase64: base64, productFile: file || null }));
+    setState(prev => ({
+      ...prev,
+      productImages: [{ url, base64, file }],
+    }));
   }, []);
 
   const setUserPrice = useCallback((userPrice: string) => {
@@ -80,11 +110,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState(initialState);
   }, []);
 
+  const productImageUrl = state.productImages[0]?.url || null;
+  const productImageBase64 = state.productImages[0]?.base64 || null;
+
   return (
     <AppContext.Provider value={{
       ...state,
       setCurrentView,
       setGeneratedProject,
+      addProductImage,
+      removeProductImage,
+      clearProductImages,
       setProductImage,
       setUserPrice,
       setIsGenerating,
@@ -92,6 +128,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setGenerationStep,
       setSelectedTemplate,
       resetApp,
+      productImageUrl,
+      productImageBase64,
     }}>
       {children}
     </AppContext.Provider>
