@@ -161,10 +161,20 @@ export function ExportPage() {
         <span class="price price-lg">${pricing.price.toLocaleString('ar-DZ')} د.ج</span>
         ${pricing.originalPrice > pricing.price ? `<span class="price-original">${pricing.originalPrice.toLocaleString('ar-DZ')} د.ج</span>` : ''}
       </div>
-      <button class="btn-primary btn-lg">${landingPage.finalCta?.buttonText || landingPage.hero.ctaText}</button>
+      <div class="cta-buttons">
+        <button class="btn-primary btn-lg">${landingPage.finalCta?.buttonText || landingPage.hero.ctaText}</button>
+        <a href="https://wa.me/?text=${encodeURIComponent(`مرحباً! أريد طلب: ${product.name}\nالسعر: ${pricing.price.toLocaleString('ar-DZ')} د.ج`)}" target="_blank" class="btn-whatsapp">
+          💬 اطلب عبر WhatsApp
+        </a>
+      </div>
       <p class="guarantee-text">${pricing.guarantee}</p>
     </div>
   </section>
+
+  <!-- Floating WhatsApp -->
+  <a href="https://wa.me/?text=${encodeURIComponent(`مرحباً! أريد طلب: ${product.name}`)}" target="_blank" class="whatsapp-float">
+    💬 اطلب الآن
+  </a>
 
   <footer>
     <p>© ${new Date().getFullYear()} ${product.brand || product.name}. جميع الحقوق محفوظة.</p>
