@@ -9,12 +9,14 @@ interface WhatsAppButtonProps {
   className?: string;
   inline?: boolean;
   label?: string;
+  phoneNumber?: string;
 }
 
-export function WhatsAppButton({ productName, price, currency = "DZD", className, inline = false, label }: WhatsAppButtonProps) {
+export function WhatsAppButton({ productName, price, currency = "DZD", className, inline = false, label, phoneNumber }: WhatsAppButtonProps) {
   const priceStr = currency === "DZD" ? `${price.toLocaleString("ar-DZ")} دج` : `${price}€`;
   const message = encodeURIComponent(`مرحباً! أريد طلب: ${productName}\nالسعر: ${priceStr}`);
-  const whatsappUrl = `https://wa.me/?text=${message}`;
+  const phone = phoneNumber ? phoneNumber.replace(/[^0-9]/g, "") : "";
+  const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
 
   if (inline) {
     return (

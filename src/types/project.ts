@@ -110,6 +110,7 @@ export interface GeneratedProject {
   productImageUrl: string;
   generatedImages: GeneratedImage[];
   template: LandingTemplate;
+  whatsappNumber?: string;
 }
 
 export type LandingTemplate = "elegant" | "bold" | "minimal" | "suspended" | "luxury" | "fashion" | "tech" | "flashsale" | "neon" | "editorial";

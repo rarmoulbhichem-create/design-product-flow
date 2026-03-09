@@ -8,7 +8,7 @@ import {
   Star, Shield, Zap, Heart, Check, ChevronDown, ChevronUp,
   Truck, Lock, RefreshCw, Headphones, ArrowLeft, Download, Save,
   Monitor, Smartphone, Palette, Pencil, Eye, Undo2, Redo2,
-  Clock, Flame,
+  Clock, Flame, Settings,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,9 @@ import { TEMPLATE_STYLES, TEMPLATE_LIST, type TemplateStyle } from "@/lib/templa
 import { TemplatePicker } from "./TemplatePicker";
 import { ScrollReveal } from "./ScrollReveal";
 import { WhatsAppButton } from "./WhatsAppButton";
+import { Input } from "./ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Label } from "./ui/label";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Star, Shield, Zap, Heart, Check, Truck, Lock, RefreshCw, Headphones,
@@ -230,6 +233,34 @@ export function LandingPreview() {
               <Smartphone className="w-4 h-4" />
             </Button>
           </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Settings className="w-4 h-4" /> {lang === "fr" ? "Paramètres" : "إعدادات"}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>{lang === "fr" ? "Paramètres du projet" : "إعدادات المشروع"}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <Label>{lang === "fr" ? "Numéro WhatsApp du vendeur" : "رقم WhatsApp للبائع"}</Label>
+                  <Input
+                    placeholder={lang === "fr" ? "Ex: +213 555 123 456" : "مثال: 213555123456+"}
+                    value={generatedProject.whatsappNumber || ""}
+                    onChange={e => updateGeneratedProject(p => ({ ...p, whatsappNumber: e.target.value }))}
+                    dir="ltr"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {lang === "fr"
+                      ? "Inclure l'indicatif pays (ex: +213 pour l'Algérie). Les clients seront redirigés vers ce numéro."
+                      : "أضف رمز البلد (مثال: 213+ للجزائر). سيتم توجيه العملاء إلى هذا الرقم."}
+                  </p>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button variant="outline" size="sm" className="gap-1.5" onClick={handleSave}>
             <Save className="w-4 h-4" /> {lang === "fr" ? "Sauvegarder" : "حفظ"}
           </Button>
@@ -761,6 +792,7 @@ export function LandingPreview() {
                 currency={pricing.currency}
                 inline
                 label={selectedLanguage === "fr" ? "Commander via WhatsApp" : "اطلب عبر WhatsApp"}
+                phoneNumber={generatedProject.whatsappNumber}
               />
             </div>
             <EditableText
@@ -787,6 +819,7 @@ export function LandingPreview() {
           price={pricing.price}
           currency={pricing.currency}
           label={selectedLanguage === "fr" ? "Commander" : "اطلب الآن"}
+          phoneNumber={generatedProject.whatsappNumber}
         />
         </motion.div>
       </AnimatePresence>

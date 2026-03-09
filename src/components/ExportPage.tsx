@@ -16,7 +16,8 @@ export function ExportPage() {
 
   if (!generatedProject) return null;
 
-  const { product, pricing, landingPage, design, seo, productImageUrl, generatedImages } = generatedProject;
+  const { product, pricing, landingPage, design, seo, productImageUrl, generatedImages, whatsappNumber } = generatedProject;
+  const waPhone = (whatsappNumber || "").replace(/[^0-9]/g, "");
 
   const ICON_EMOJI_MAP: Record<string, string> = {
     Star: '⭐', Shield: '🛡️', Zap: '⚡', Heart: '❤️', Check: '✅',
@@ -163,7 +164,7 @@ export function ExportPage() {
       </div>
       <div class="cta-buttons">
         <button class="btn-primary btn-lg">${landingPage.finalCta?.buttonText || landingPage.hero.ctaText}</button>
-        <a href="https://wa.me/?text=${encodeURIComponent(`مرحباً! أريد طلب: ${product.name}\nالسعر: ${pricing.price.toLocaleString('ar-DZ')} د.ج`)}" target="_blank" class="btn-whatsapp">
+        <a href="https://wa.me/${waPhone}?text=${encodeURIComponent(`مرحباً! أريد طلب: ${product.name}\nالسعر: ${pricing.price.toLocaleString('ar-DZ')} د.ج`)}" target="_blank" class="btn-whatsapp">
           💬 اطلب عبر WhatsApp
         </a>
       </div>
@@ -172,7 +173,7 @@ export function ExportPage() {
   </section>
 
   <!-- Floating WhatsApp -->
-  <a href="https://wa.me/?text=${encodeURIComponent(`مرحباً! أريد طلب: ${product.name}`)}" target="_blank" class="whatsapp-float">
+  <a href="https://wa.me/${waPhone}?text=${encodeURIComponent(`مرحباً! أريد طلب: ${product.name}`)}" target="_blank" class="whatsapp-float">
     💬 اطلب الآن
   </a>
 
