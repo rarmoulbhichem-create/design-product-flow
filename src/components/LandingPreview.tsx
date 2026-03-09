@@ -8,7 +8,7 @@ import {
   Star, Shield, Zap, Heart, Check, ChevronDown, ChevronUp,
   Truck, Lock, RefreshCw, Headphones, ArrowLeft, Download, Save,
   Monitor, Smartphone, Palette, Pencil, Eye, Undo2, Redo2,
-  Clock, Flame,
+  Clock, Flame, Settings,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,9 @@ import { TEMPLATE_STYLES, TEMPLATE_LIST, type TemplateStyle } from "@/lib/templa
 import { TemplatePicker } from "./TemplatePicker";
 import { ScrollReveal } from "./ScrollReveal";
 import { WhatsAppButton } from "./WhatsAppButton";
+import { Input } from "./ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Label } from "./ui/label";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Star, Shield, Zap, Heart, Check, Truck, Lock, RefreshCw, Headphones,
