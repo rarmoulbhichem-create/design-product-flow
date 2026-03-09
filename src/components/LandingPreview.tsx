@@ -11,6 +11,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { LandingTemplate } from "@/types/project";
 import { EditableText } from "./EditableText";
+import { EditableImage } from "./EditableImage";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const ICON_MAP: Record<string, React.ElementType> = {
