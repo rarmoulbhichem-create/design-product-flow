@@ -120,6 +120,11 @@ export function ProductUpload() {
       setGenerationProgress(100);
       setGenerationStep(t.landingCreated);
 
+      // Use AI-recommended template if available, fallback to user selection
+      const validTemplates = ["elegant", "bold", "minimal", "suspended", "luxury", "fashion", "tech", "flashsale", "neon", "editorial"];
+      const aiTemplate = analysisData.recommendedTemplate;
+      const finalTemplate = (aiTemplate && validTemplates.includes(aiTemplate)) ? aiTemplate : selectedTemplate;
+
       setGeneratedProject({
         product: analysisData.product,
         pricing: analysisData.pricing,
@@ -128,7 +133,7 @@ export function ProductUpload() {
         design: analysisData.design,
         productImageUrl: productImages[0].url,
         generatedImages,
-        template: selectedTemplate,
+        template: finalTemplate,
       });
 
       setTimeout(() => {
