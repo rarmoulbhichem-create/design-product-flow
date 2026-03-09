@@ -760,7 +760,8 @@ export function LandingPreview() {
             {t.allRights(product.brand || product.name)}
           </p>
         </footer>
-      </div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
