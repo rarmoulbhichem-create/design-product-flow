@@ -42,7 +42,12 @@ export function LandingPreview() {
 
   if (!generatedProject) return null;
 
-  const { product, pricing, landingPage, design, productImageUrl } = generatedProject;
+  const { product, pricing, landingPage, design, productImageUrl, generatedImages = [] } = generatedProject;
+  
+  // Use generated images for different sections, fallback to original
+  const heroImage = generatedImages[0]?.url || productImageUrl;
+  const detailImage = generatedImages[1]?.url || productImageUrl;
+  const galleryImage = generatedImages[2]?.url || productImageUrl;
 
   const primaryColor = design?.primaryColor || "#7c3aed";
   const accentColor = design?.accentColor || "#06b6d4";
