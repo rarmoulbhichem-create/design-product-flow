@@ -61,6 +61,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, generatedProject }));
   }, []);
 
+  const updateGeneratedProject = useCallback((updater: (prev: GeneratedProject) => GeneratedProject) => {
+    setState(prev => {
+      if (!prev.generatedProject) return prev;
+      return { ...prev, generatedProject: updater(prev.generatedProject) };
+    });
+  }, []);
+
   const addProductImage = useCallback((url: string, base64: string, file?: File) => {
     setState(prev => ({
       ...prev,
