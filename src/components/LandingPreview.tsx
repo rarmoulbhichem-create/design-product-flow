@@ -17,6 +17,8 @@ import { EditableImage } from "./EditableImage";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { TEMPLATE_STYLES, TEMPLATE_LIST, type TemplateStyle } from "@/lib/templates";
 import { TemplatePicker } from "./TemplatePicker";
+import { ScrollReveal } from "./ScrollReveal";
+import { WhatsAppButton } from "./WhatsAppButton";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Star, Shield, Zap, Heart, Check, Truck, Lock, RefreshCw, Headphones,
