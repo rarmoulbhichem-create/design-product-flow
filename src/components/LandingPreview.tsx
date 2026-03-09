@@ -317,16 +317,261 @@ export function LandingPreview() {
                     <StarRating rating={Math.round(landingPage.socialProof.rating)} />
                     <span className="font-bold mr-1">{landingPage.socialProof.rating}/5</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{landingPage.socialProof.reviewCount.toLocaleString("ar-DZ")} تقييم</p>
+                  <p className="text-sm text-muted-foreground">{landingPage.socialProof.reviewCount.toLocaleString("ar-DZ")} {t.reviews}</p>
                 </div>
                 <div>
                   <p className="text-3xl font-bold" style={{ color: primaryColor }}>{landingPage.socialProof.satisfactionRate}%</p>
-                  <p className="text-sm text-muted-foreground">عملاء راضون</p>
+                  <p className="text-sm text-muted-foreground">{t.satisfied}</p>
                 </div>
               </div>
             </div>
           </section>
         )}
+
+        {/* BENEFITS */}
+        <section className="py-16 md:py-20">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+              {t.whyChoose(product.name)}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {(landingPage.benefits || []).map((benefit, i) => {
+                const Icon = ICON_MAP[benefit.icon] || Star;
+                return (
+                  <Card key={i} className="text-center p-6 hover:border-primary/50 transition-all hover:-translate-y-1">
+                    <CardContent className="p-0 space-y-3">
+                      <div className="w-12 h-12 mx-auto rounded-xl flex items-center justify-center" style={{ backgroundColor: `${primaryColor}15` }}>
+                        <Icon className="w-6 h-6" style={{ color: primaryColor }} />
+                      </div>
+                      <EditableText value={benefit.title} onChange={v => updateBenefit(i, { title: v })} editMode={editMode} as="h3" className="font-semibold" />
+                      <EditableText value={benefit.description} onChange={v => updateBenefit(i, { description: v })} editMode={editMode} as="p" className="text-sm text-muted-foreground" multiline />
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* PRODUCT DETAILS + GALLERY */}
+        <section className="py-16 md:py-20 bg-card/30">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row gap-12 items-start">
+              <div className="flex-1">
+                <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.productDesc}</h2>
+                <EditableText value={product.longDescription} onChange={v => updateProduct({ longDescription: v })} editMode={editMode} as="p" multiline className="text-muted-foreground leading-relaxed mb-8" />
+                <h3 className="text-xl font-semibold mb-4">{t.specifications}</h3>
+                <div className="space-y-3">
+                  {(product.specifications || []).map((spec, i) => (
+                    <div key={i} className="flex justify-between py-2 border-b border-border last:border-0">
+                      <EditableText value={spec.label} onChange={v => updateSpec(i, "label", v)} editMode={editMode} as="span" className="text-muted-foreground" />
+                      <EditableText value={spec.value} onChange={v => updateSpec(i, "value", v)} editMode={editMode} as="span" className="font-medium" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex-1 space-y-4">
+                <EditableImage
+                  src={detailImage}
+                  alt={product.name}
+                  editMode={editMode}
+                  onChange={url => updateImage(1, url)}
+                  className="rounded-2xl overflow-hidden border border-border"
+                  imgClassName="w-full aspect-square object-cover"
+                />
+                {(generatedImages.length > 0 || productImageUrl) && (
+                  <div className="grid grid-cols-3 gap-3">
+                    {[productImageUrl, ...generatedImages.map(img => img.url)].filter(Boolean).slice(0, 3).map((imgUrl, i) => (
+                      <EditableImage
+                        key={i}
+                        src={imgUrl!}
+                        alt={`${product.name} ${i + 1}`}
+                        editMode={editMode}
+                        onChange={url => updateImage(i === 0 ? -1 : i - 1, url)}
+                        className="rounded-xl overflow-hidden border border-border aspect-square"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FEATURES */}
+        <section className="py-16 md:py-20">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">{t.features}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(landingPage.features || []).map((feature, i) => (
+                <div key={i} className="p-5 rounded-xl border border-border hover:border-primary/30 transition-all">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${primaryColor}15` }}>
+                      <Check className="w-4 h-4" style={{ color: primaryColor }} />
+                    </div>
+                    <div>
+                      <EditableText value={feature.title} onChange={v => updateFeature(i, { title: v })} editMode={editMode} as="h3" className="font-semibold mb-1" />
+                      <EditableText value={feature.description} onChange={v => updateFeature(i, { description: v })} editMode={editMode} as="p" className="text-sm text-muted-foreground" multiline />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* TESTIMONIALS */}
+        <section className="py-16 md:py-20 bg-card/30">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">{t.testimonials}</h2>
+            <div className="flex justify-center mb-12">
+              <div className="flex items-center gap-2">
+                <StarRating rating={5} />
+                <span className="text-sm text-muted-foreground">
+                  {t.basedOn(landingPage.socialProof?.reviewCount?.toLocaleString("ar-DZ") || "0")}
+                </span>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {(landingPage.testimonials || []).map((testimonial, i) => (
+                <Card key={i} className="p-5">
+                  <CardContent className="p-0 space-y-3">
+                    <StarRating rating={testimonial.rating} />
+                    <EditableText value={testimonial.text} onChange={v => updateTestimonial(i, { text: v })} editMode={editMode} as="p" className="text-sm" multiline />
+                    <div className="flex items-center justify-between pt-2 border-t border-border">
+                      <div>
+                        <EditableText value={testimonial.name} onChange={v => updateTestimonial(i, { name: v })} editMode={editMode} as="p" className="font-medium text-sm" />
+                        <EditableText value={testimonial.location} onChange={v => updateTestimonial(i, { location: v })} editMode={editMode} as="p" className="text-xs text-muted-foreground" />
+                      </div>
+                      {testimonial.verified && (
+                        <Badge variant="secondary" className="text-xs">
+                          <Check className="w-3 h-3 ml-1" /> {t.verified}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">{testimonial.date}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* PRICING CTA */}
+        <section className="py-16 md:py-20">
+          <div className="container mx-auto px-4">
+            <Card className="max-w-2xl mx-auto overflow-hidden" style={{ borderColor: `${primaryColor}30` }}>
+              <CardContent className="p-8 md:p-12 text-center space-y-6">
+                {landingPage.urgency && (
+                  <Badge variant="destructive" className="text-sm px-4 py-1">
+                    {landingPage.urgency.text}
+                  </Badge>
+                )}
+                <EditableText value={product.name} onChange={v => updateProduct({ name: v })} editMode={editMode} as="h2" className="text-3xl font-bold" />
+                <EditableText value={product.shortDescription} onChange={v => updateProduct({ shortDescription: v })} editMode={editMode} as="p" className="text-muted-foreground" multiline />
+                <div className="flex items-baseline justify-center gap-3">
+                  <EditableText
+                    value={String(pricing.price)}
+                    onChange={v => updatePricing({ price: Number(v) || 0 })}
+                    editMode={editMode}
+                    as="span"
+                    type="number"
+                    className="text-5xl font-bold"
+                    style={{ color: primaryColor }}
+                  />
+                  {!editMode && <span className="text-5xl font-bold" style={{ color: primaryColor }}> {currency === "DZD" ? "دج" : "€"}</span>}
+                  {pricing.originalPrice > pricing.price && (
+                    <span className="text-2xl text-muted-foreground line-through">{formatPrice(pricing.originalPrice, currency)}</span>
+                  )}
+                </div>
+                <EditableText value={pricing.shippingInfo} onChange={v => updatePricing({ shippingInfo: v })} editMode={editMode} as="p" className="text-sm text-muted-foreground" />
+                <Button size="lg" className="text-lg px-12 py-6 w-full md:w-auto" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }}>
+                  <EditableText value={landingPage.hero.ctaText} onChange={v => updateHero({ ctaText: v })} editMode={editMode} />
+                </Button>
+                <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
+                  <Shield className="w-4 h-4" />
+                  <EditableText value={pricing.guarantee} onChange={v => updatePricing({ guarantee: v })} editMode={editMode} />
+                </p>
+                {landingPage.urgency?.stockText && (
+                  <p className="text-sm font-medium" style={{ color: primaryColor }}>{landingPage.urgency.stockText}</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="py-16 md:py-20 bg-card/30">
+          <div className="container mx-auto px-4 max-w-3xl">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">{t.faq}</h2>
+            <div className="space-y-3">
+              {(landingPage.faq || []).map((item, i) => (
+                <div key={i} className="border border-border rounded-xl overflow-hidden">
+                  <button
+                    onClick={() => !editMode && setOpenFaq(openFaq === i ? null : i)}
+                    className={cn("w-full flex items-center justify-between p-5 hover:bg-card/50 transition-colors", selectedLanguage === "fr" ? "text-left" : "text-right")}
+                  >
+                    <EditableText value={item.question} onChange={v => updateFaq(i, { question: v })} editMode={editMode} as="span" className="font-medium pl-4" />
+                    {openFaq === i ? <ChevronUp className="w-5 h-5 shrink-0" /> : <ChevronDown className="w-5 h-5 shrink-0" />}
+                  </button>
+                  {(openFaq === i || editMode) && (
+                    <div className="px-5 pb-5 text-muted-foreground text-sm animate-fade-in">
+                      <EditableText value={item.answer} onChange={v => updateFaq(i, { answer: v })} editMode={editMode} as="div" multiline />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* FINAL CTA */}
+        <section className="py-16 md:py-24 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-5" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }} />
+          <div className="relative container mx-auto px-4 text-center space-y-6">
+            <EditableText
+              value={landingPage.finalCta?.headline || t.readyToOrder}
+              onChange={v => updateFinalCta({ headline: v })}
+              editMode={editMode}
+              as="h2"
+              className="text-3xl md:text-4xl font-bold"
+            />
+            <EditableText
+              value={landingPage.finalCta?.subheadline || t.dontMiss}
+              onChange={v => updateFinalCta({ subheadline: v })}
+              editMode={editMode}
+              as="p"
+              className="text-lg text-muted-foreground max-w-xl mx-auto"
+              multiline
+            />
+            <Button size="lg" className="text-lg px-12 py-6" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }}>
+              <EditableText
+                value={landingPage.finalCta?.buttonText || landingPage.hero.ctaText}
+                onChange={v => updateFinalCta({ buttonText: v })}
+                editMode={editMode}
+              />
+            </Button>
+            <EditableText
+              value={landingPage.finalCta?.guaranteeText || pricing.guarantee}
+              onChange={v => updateFinalCta({ guaranteeText: v })}
+              editMode={editMode}
+              as="p"
+              className="text-sm text-muted-foreground"
+            />
+          </div>
+        </section>
+
+        {/* FOOTER */}
+        <footer className="py-8 border-t border-border text-center">
+          <p className="text-sm text-muted-foreground">
+            {t.allRights(product.brand || product.name)}
+          </p>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
 
         {/* BENEFITS */}
         <section className="py-16 md:py-20">
