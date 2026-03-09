@@ -27,6 +27,7 @@ interface AppContextType extends AppState {
   removeProductImage: (index: number) => void;
   clearProductImages: () => void;
   setUserPrice: (price: string) => void;
+  setSelectedLanguage: (lang: LandingLanguage) => void;
   setIsGenerating: (val: boolean) => void;
   setGenerationProgress: (val: number) => void;
   setGenerationStep: (val: string) => void;
