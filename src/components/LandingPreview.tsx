@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Star, Shield, Zap, Heart, Check, ChevronDown, ChevronUp,
   Truck, Lock, RefreshCw, Headphones, ArrowLeft, Download,
-  Monitor, Smartphone, Palette, Eye,
+  Monitor, Smartphone, Palette,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -16,10 +16,10 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 const TEMPLATES: { id: LandingTemplate; name: string; desc: string }[] = [
-  { id: "elegant", name: "Élégant", desc: "Design raffiné et premium" },
-  { id: "bold", name: "Audacieux", desc: "Couleurs vives, impact visuel" },
-  { id: "minimal", name: "Minimal", desc: "Épuré et moderne" },
-  { id: "suspended", name: "Suspendu", desc: "Effet flottant créatif" },
+  { id: "elegant", name: "أنيق", desc: "تصميم راقي وفاخر" },
+  { id: "bold", name: "جريء", desc: "ألوان قوية وتأثير بصري" },
+  { id: "minimal", name: "بسيط", desc: "نظيف وعصري" },
+  { id: "suspended", name: "معلّق", desc: "تأثير عائم إبداعي" },
 ];
 
 function StarRating({ rating }: { rating: number }) {
@@ -35,6 +35,11 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
+function formatPrice(price: number, currency: string) {
+  if (currency === "DZD") return `${price.toLocaleString("ar-DZ")} دج`;
+  return `${price}€`;
+}
+
 export function LandingPreview() {
   const { generatedProject, setCurrentView, setSelectedTemplate, resetApp } = useApp();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -44,10 +49,10 @@ export function LandingPreview() {
 
   const { product, pricing, landingPage, design, productImageUrl, generatedImages = [] } = generatedProject;
   
-  // Use generated images for different sections, fallback to original
   const heroImage = generatedImages[0]?.url || productImageUrl;
   const detailImage = generatedImages[1]?.url || productImageUrl;
   const galleryImage = generatedImages[2]?.url || productImageUrl;
+  const currency = pricing?.currency || "DZD";
 
   const primaryColor = design?.primaryColor || "#7c3aed";
   const accentColor = design?.accentColor || "#06b6d4";
@@ -58,7 +63,7 @@ export function LandingPreview() {
       <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border px-4 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => { resetApp(); setCurrentView("upload"); }}>
-            <ArrowLeft className="w-4 h-4 mr-1" /> Nouveau
+            <ArrowLeft className="w-4 h-4 ml-1" /> جديد
           </Button>
           <div className="h-6 w-px bg-border" />
           <div className="flex gap-1">
@@ -70,7 +75,7 @@ export function LandingPreview() {
                 onClick={() => setSelectedTemplate(t.id)}
                 className="text-xs"
               >
-                <Palette className="w-3 h-3 mr-1" />
+                <Palette className="w-3 h-3 ml-1" />
                 {t.name}
               </Button>
             ))}
@@ -96,22 +101,23 @@ export function LandingPreview() {
             </Button>
           </div>
           <Button className="btn-gradient gap-2" size="sm" onClick={() => setCurrentView("export")}>
-            <Download className="w-4 h-4" /> Exporter
+            <Download className="w-4 h-4" /> تصدير
           </Button>
         </div>
       </div>
 
-      {/* Landing Page Content */}
+      {/* Landing Page Content - RTL Arabic */}
       <div className={cn(
         "mx-auto transition-all duration-500",
         viewMode === "mobile" ? "max-w-[390px]" : "max-w-full"
-      )}>
+      )} dir="rtl">
+        
         {/* HERO */}
         <section className="relative overflow-hidden py-16 md:py-24">
           <div className="absolute inset-0 opacity-10" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }} />
           <div className="relative container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
-              <div className="flex-1 text-center md:text-left space-y-6">
+              <div className="flex-1 text-center md:text-right space-y-6">
                 {landingPage.hero.badge && (
                   <Badge className="text-sm px-4 py-1" style={{ backgroundColor: `${primaryColor}20`, color: primaryColor, border: `1px solid ${primaryColor}40` }}>
                     {landingPage.hero.badge}
@@ -124,13 +130,13 @@ export function LandingPreview() {
                   {landingPage.hero.subheadline}
                 </p>
                 <div className="space-y-3">
-                  <div className="flex items-baseline gap-3">
+                  <div className="flex items-baseline gap-3 justify-center md:justify-start">
                     <span className="text-4xl font-bold" style={{ color: primaryColor }}>
-                      {pricing.price}€
+                      {formatPrice(pricing.price, currency)}
                     </span>
                     {pricing.originalPrice > pricing.price && (
                       <span className="text-xl text-muted-foreground line-through">
-                        {pricing.originalPrice}€
+                        {formatPrice(pricing.originalPrice, currency)}
                       </span>
                     )}
                     {pricing.discountPercent > 0 && (
@@ -180,13 +186,13 @@ export function LandingPreview() {
                 <div>
                   <div className="flex items-center justify-center gap-1 mb-1">
                     <StarRating rating={Math.round(landingPage.socialProof.rating)} />
-                    <span className="font-bold ml-1">{landingPage.socialProof.rating}/5</span>
+                    <span className="font-bold mr-1">{landingPage.socialProof.rating}/5</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{landingPage.socialProof.reviewCount.toLocaleString()} avis</p>
+                  <p className="text-sm text-muted-foreground">{landingPage.socialProof.reviewCount.toLocaleString("ar-DZ")} تقييم</p>
                 </div>
                 <div>
                   <p className="text-3xl font-bold" style={{ color: primaryColor }}>{landingPage.socialProof.satisfactionRate}%</p>
-                  <p className="text-sm text-muted-foreground">Clients satisfaits</p>
+                  <p className="text-sm text-muted-foreground">عملاء راضون</p>
                 </div>
               </div>
             </div>
@@ -197,7 +203,7 @@ export function LandingPreview() {
         <section className="py-16 md:py-20">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
-              Pourquoi choisir {product.name} ?
+              لماذا تختار {product.name}؟
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {(landingPage.benefits || []).map((benefit, i) => {
@@ -218,14 +224,14 @@ export function LandingPreview() {
           </div>
         </section>
 
-        {/* PRODUCT DETAILS */}
+        {/* PRODUCT DETAILS + GALLERY */}
         <section className="py-16 md:py-20 bg-card/30">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row gap-12 items-start">
               <div className="flex-1">
-                <h2 className="text-2xl md:text-3xl font-bold mb-6">Description du produit</h2>
+                <h2 className="text-2xl md:text-3xl font-bold mb-6">وصف المنتج</h2>
                 <p className="text-muted-foreground leading-relaxed mb-8">{product.longDescription}</p>
-                <h3 className="text-xl font-semibold mb-4">Spécifications</h3>
+                <h3 className="text-xl font-semibold mb-4">المواصفات</h3>
                 <div className="space-y-3">
                   {(product.specifications || []).map((spec, i) => (
                     <div key={i} className="flex justify-between py-2 border-b border-border last:border-0">
@@ -239,11 +245,11 @@ export function LandingPreview() {
                 <div className="rounded-2xl overflow-hidden border border-border">
                   <img src={detailImage} alt={product.name} className="w-full aspect-square object-cover" />
                 </div>
-                {generatedImages.length > 2 && (
+                {(generatedImages.length > 0 || productImageUrl) && (
                   <div className="grid grid-cols-3 gap-3">
-                    {[productImageUrl, ...generatedImages.map(img => img.url)].slice(0, 3).map((imgUrl, i) => (
+                    {[productImageUrl, ...generatedImages.map(img => img.url)].filter(Boolean).slice(0, 3).map((imgUrl, i) => (
                       <div key={i} className="rounded-xl overflow-hidden border border-border aspect-square">
-                        <img src={imgUrl} alt={`${product.name} vue ${i + 1}`} className="w-full h-full object-cover" />
+                        <img src={imgUrl!} alt={`${product.name} ${i + 1}`} className="w-full h-full object-cover" />
                       </div>
                     ))}
                   </div>
@@ -253,10 +259,10 @@ export function LandingPreview() {
           </div>
         </section>
 
-        {/* FEATURES GRID */}
+        {/* FEATURES */}
         <section className="py-16 md:py-20">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">Caractéristiques</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">المميزات</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {(landingPage.features || []).map((feature, i) => (
                 <div key={i} className="p-5 rounded-xl border border-border hover:border-primary/30 transition-all">
@@ -278,12 +284,12 @@ export function LandingPreview() {
         {/* TESTIMONIALS */}
         <section className="py-16 md:py-20 bg-card/30">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">Ce que disent nos clients</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">ماذا يقول عملاؤنا</h2>
             <div className="flex justify-center mb-12">
               <div className="flex items-center gap-2">
                 <StarRating rating={5} />
                 <span className="text-sm text-muted-foreground">
-                  Basé sur {landingPage.socialProof?.reviewCount?.toLocaleString()} avis
+                  بناءً على {landingPage.socialProof?.reviewCount?.toLocaleString("ar-DZ")} تقييم
                 </span>
               </div>
             </div>
@@ -300,7 +306,7 @@ export function LandingPreview() {
                       </div>
                       {t.verified && (
                         <Badge variant="secondary" className="text-xs">
-                          <Check className="w-3 h-3 mr-1" /> Vérifié
+                          <Check className="w-3 h-3 ml-1" /> موثّق
                         </Badge>
                       )}
                     </div>
@@ -326,10 +332,10 @@ export function LandingPreview() {
                 <p className="text-muted-foreground">{product.shortDescription}</p>
                 <div className="flex items-baseline justify-center gap-3">
                   <span className="text-5xl font-bold" style={{ color: primaryColor }}>
-                    {pricing.price}€
+                    {formatPrice(pricing.price, currency)}
                   </span>
                   {pricing.originalPrice > pricing.price && (
-                    <span className="text-2xl text-muted-foreground line-through">{pricing.originalPrice}€</span>
+                    <span className="text-2xl text-muted-foreground line-through">{formatPrice(pricing.originalPrice, currency)}</span>
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground">{pricing.shippingInfo}</p>
@@ -350,15 +356,15 @@ export function LandingPreview() {
         {/* FAQ */}
         <section className="py-16 md:py-20 bg-card/30">
           <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">Questions fréquentes</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">الأسئلة الشائعة</h2>
             <div className="space-y-3">
               {(landingPage.faq || []).map((item, i) => (
                 <div key={i} className="border border-border rounded-xl overflow-hidden">
                   <button
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full flex items-center justify-between p-5 text-left hover:bg-card/50 transition-colors"
+                    className="w-full flex items-center justify-between p-5 text-right hover:bg-card/50 transition-colors"
                   >
-                    <span className="font-medium pr-4">{item.question}</span>
+                    <span className="font-medium pl-4">{item.question}</span>
                     {openFaq === i ? <ChevronUp className="w-5 h-5 shrink-0" /> : <ChevronDown className="w-5 h-5 shrink-0" />}
                   </button>
                   {openFaq === i && (
@@ -377,10 +383,10 @@ export function LandingPreview() {
           <div className="absolute inset-0 opacity-5" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }} />
           <div className="relative container mx-auto px-4 text-center space-y-6">
             <h2 className="text-3xl md:text-4xl font-bold">
-              {landingPage.finalCta?.headline || "Prêt à commander ?"}
+              {landingPage.finalCta?.headline || "هل أنت مستعد للطلب؟"}
             </h2>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-              {landingPage.finalCta?.subheadline || "Ne manquez pas cette offre exceptionnelle."}
+              {landingPage.finalCta?.subheadline || "لا تفوّت هذا العرض الاستثنائي."}
             </p>
             <Button size="lg" className="text-lg px-12 py-6" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }}>
               {landingPage.finalCta?.buttonText || landingPage.hero.ctaText}
@@ -394,7 +400,7 @@ export function LandingPreview() {
         {/* FOOTER */}
         <footer className="py-8 border-t border-border text-center">
           <p className="text-sm text-muted-foreground">
-            © 2024 {product.brand || product.name}. Tous droits réservés.
+            © 2024 {product.brand || product.name}. جميع الحقوق محفوظة.
           </p>
         </footer>
       </div>
