@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { useApp } from "@/contexts/AppContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,17 +10,6 @@ import type { LandingLanguage } from "@/types/project";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-const GENERATION_STEPS = [
-  { label: "تحليل صور المنتج بالذكاء الاصطناعي...", progress: 10 },
-  { label: "التعرف على المنتج والبحث عن معلوماته...", progress: 25 },
-  { label: "إنشاء المحتوى التسويقي بالعربية...", progress: 40 },
-  { label: "إنشاء صور المنتج الاحترافية...", progress: 55 },
-  { label: "تصميم الصور بأسلوب lifestyle...", progress: 70 },
-  { label: "تجميع صفحة الهبوط...", progress: 85 },
-  { label: "تحسين SEO والإنهاء...", progress: 95 },
-  { label: "تم إنشاء صفحة الهبوط! ✅", progress: 100 },
-];
 
 const MAX_IMAGES = 5;
 
@@ -46,6 +36,19 @@ export function ProductUpload() {
     productImageUrl,
     productImageBase64,
   } = useApp();
+
+  const { t, dir } = useLanguage();
+
+  const GENERATION_STEPS = [
+    { label: t.step1, progress: 10 },
+    { label: t.step2, progress: 25 },
+    { label: t.step3, progress: 40 },
+    { label: t.step4, progress: 55 },
+    { label: t.step5, progress: 70 },
+    { label: t.step6, progress: 85 },
+    { label: t.step7, progress: 95 },
+    { label: t.step8, progress: 100 },
+  ];
 
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,12 +86,11 @@ export function ProductUpload() {
     setIsGenerating(true);
     setCurrentView("generating");
     setGenerationProgress(5);
-    setGenerationStep("تحضير الصور...");
+    setGenerationStep(t.preparingImages);
 
     const progressInterval = simulateProgress();
 
     try {
-      // Send all images to analyze
       const imagesBase64 = productImages.map(img => img.base64);
       
       const { data: analysisData, error: analysisError } = await supabase.functions.invoke("analyze-product", {
@@ -100,10 +102,9 @@ export function ProductUpload() {
         },
       });
 
-      if (analysisError) throw new Error(analysisError.message || "خطأ في التحليل");
+      if (analysisError) throw new Error(analysisError.message || t.generationError);
       if (analysisData?.error) throw new Error(analysisData.error);
 
-      // Generate matching images
       const { data: imageData } = await supabase.functions.invoke("generate-product-images", {
         body: {
           imageBase64: imagesBase64[0],
@@ -117,7 +118,7 @@ export function ProductUpload() {
       const generatedImages = imageData?.images || [];
 
       setGenerationProgress(100);
-      setGenerationStep("تم إنشاء صفحة الهبوط! ✅");
+      setGenerationStep(t.landingCreated);
 
       setGeneratedProject({
         product: analysisData.product,
@@ -133,15 +134,15 @@ export function ProductUpload() {
       setTimeout(() => {
         setIsGenerating(false);
         setCurrentView("preview");
-        toast.success(`تم إنشاء صفحة الهبوط مع ${generatedImages.length} صور!`);
+        toast.success(t.landingCreatedWith.replace("{count}", String(generatedImages.length)));
       }, 800);
     } catch (err) {
       clearInterval(progressInterval);
       console.error("Generation error:", err);
-      setError(err instanceof Error ? err.message : "خطأ غير معروف");
+      setError(err instanceof Error ? err.message : t.generationError);
       setIsGenerating(false);
       setCurrentView("price");
-      toast.error("خطأ أثناء الإنشاء");
+      toast.error(t.errorDuringGeneration);
     }
   };
 
@@ -159,7 +160,7 @@ export function ProductUpload() {
     }
 
     if (imageFiles.length > remaining) {
-      toast.info(`تم إضافة ${remaining} صور فقط (الحد الأقصى ${MAX_IMAGES})`);
+      toast.info(t.addedImagesOnly.replace("{count}", String(remaining)).replace("{max}", String(MAX_IMAGES)));
     }
   };
 
@@ -186,13 +187,12 @@ export function ProductUpload() {
   // GENERATING VIEW
   if (isGenerating || currentView === "generating") {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center animate-fade-in" dir="rtl">
+      <div className="min-h-[80vh] flex items-center justify-center animate-fade-in" dir={dir}>
         <div className="max-w-lg w-full space-y-8 text-center">
-          {/* Show uploaded images thumbnails */}
           <div className="flex justify-center gap-2 flex-wrap">
             {productImages.slice(0, 4).map((img, i) => (
               <div key={i} className="w-20 h-20 rounded-xl overflow-hidden border-2 border-primary/30 shadow-lg shadow-primary/20">
-                <img src={img.url} alt={`المنتج ${i + 1}`} className="w-full h-full object-cover" />
+                <img src={img.url} alt={`${t.product} ${i + 1}`} className="w-full h-full object-cover" />
               </div>
             ))}
             {productImages.length > 4 && (
@@ -205,7 +205,7 @@ export function ProductUpload() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
               <Sparkles className="w-8 h-8 text-primary animate-pulse" />
             </div>
-            <h2 className="text-2xl font-bold mb-2">جاري الإنشاء...</h2>
+            <h2 className="text-2xl font-bold mb-2">{t.creatingLanding}</h2>
             <p className="text-muted-foreground">{generationStep}</p>
           </div>
           <div className="space-y-2">
@@ -223,7 +223,7 @@ export function ProductUpload() {
                 ) : (
                   <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" />
                 )}
-                <span className="text-right">{step.label.replace("...", "")}</span>
+                <span className={dir === "rtl" ? "text-right" : "text-left"}>{step.label.replace("...", "")}</span>
               </div>
             ))}
           </div>
@@ -235,13 +235,13 @@ export function ProductUpload() {
   // PRICE INPUT VIEW
   if (currentView === "price") {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center animate-fade-in" dir="rtl">
+      <div className="min-h-[80vh] flex items-center justify-center animate-fade-in" dir={dir}>
         <div className="max-w-xl w-full space-y-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold mb-3">
-              تم اختيار <span className="gradient-text">{productImages.length} صورة</span> للمنتج
+              {t.selectedImages.replace("{count}", String(productImages.length))}
             </h2>
-            <p className="text-muted-foreground">أدخل السعر بالدينار الجزائري (اختياري) ثم ابدأ الإنشاء</p>
+            <p className="text-muted-foreground">{t.enterPrice}</p>
           </div>
 
           {/* Image thumbnails grid */}
@@ -249,7 +249,7 @@ export function ProductUpload() {
             {productImages.map((img, i) => (
               <div key={i} className="relative group">
                 <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-primary/30 shadow-xl shadow-primary/20">
-                  <img src={img.url} alt={`المنتج ${i + 1}`} className="w-full h-full object-cover" />
+                  <img src={img.url} alt={`${t.product} ${i + 1}`} className="w-full h-full object-cover" />
                 </div>
                 <button
                   onClick={() => removeProductImage(i)}
@@ -259,7 +259,7 @@ export function ProductUpload() {
                 </button>
                 {i === 0 && (
                   <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                    رئيسية
+                    {t.primary}
                   </span>
                 )}
               </div>
@@ -271,13 +271,13 @@ export function ProductUpload() {
             <CardContent className="p-6 space-y-3">
               <label className="text-sm font-medium flex items-center gap-2">
                 <Globe className="w-4 h-4 text-primary" />
-                لغة صفحة الهبوط
+                {t.landingLanguage}
               </label>
               <div className="grid grid-cols-3 gap-3">
                 {([
-                  { id: "ar" as LandingLanguage, label: "العربية", flag: "🇩🇿", desc: "عربية جزائرية" },
-                  { id: "fr" as LandingLanguage, label: "Français", flag: "🇫🇷", desc: "فرنسية جزائرية" },
-                  { id: "both" as LandingLanguage, label: "الاثنتان", flag: "🌍", desc: "عربية + فرنسية" },
+                  { id: "ar" as LandingLanguage, label: t.arabic, flag: "🇩🇿", desc: t.arabicDesc },
+                  { id: "fr" as LandingLanguage, label: t.french, flag: "🇫🇷", desc: t.frenchDesc },
+                  { id: "both" as LandingLanguage, label: t.both, flag: "🌍", desc: t.bothDesc },
                 ]).map(lang => (
                   <button
                     key={lang.id}
@@ -303,18 +303,18 @@ export function ProductUpload() {
               <div className="space-y-2">
                 <label className="text-sm font-medium flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-primary" />
-                  سعر المنتج (دج - دينار جزائري)
+                  {t.productPrice}
                 </label>
                 <Input
                   type="number"
-                  placeholder="مثال: 7999"
+                  placeholder={t.priceExample}
                   value={userPrice}
                   onChange={(e) => setUserPrice(e.target.value)}
                   className="text-lg text-center h-14 text-xl font-bold"
                   dir="ltr"
                 />
                 <p className="text-xs text-muted-foreground text-center">
-                  اتركه فارغاً ليقوم الذكاء الاصطناعي بتقدير السعر تلقائياً
+                  {t.leaveEmptyForAI}
                 </p>
               </div>
             </CardContent>
@@ -329,7 +329,7 @@ export function ProductUpload() {
                 setCurrentView("upload");
               }}
             >
-              تغيير الصور
+              {t.changeImages}
             </Button>
             <Button
               className="flex-1 btn-gradient gap-2 text-lg h-14"
@@ -337,7 +337,7 @@ export function ProductUpload() {
               disabled={productImages.length === 0}
             >
               <Sparkles className="w-5 h-5" />
-              إنشاء صفحة الهبوط
+              {t.generateLanding}
               <ArrowRight className="w-5 h-5" />
             </Button>
           </div>
@@ -348,20 +348,19 @@ export function ProductUpload() {
 
   // UPLOAD VIEW
   return (
-    <div className="min-h-[80vh] flex items-center justify-center animate-fade-in" dir="rtl">
+    <div className="min-h-[80vh] flex items-center justify-center animate-fade-in" dir={dir}>
       <div className="max-w-2xl w-full space-y-8">
         <div className="text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm mb-6">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span>الذكاء الاصطناعي يُنشئ كل شيء تلقائياً</span>
+            <span>{t.aiCreatesEverything}</span>
           </div>
           <h1 className="text-4xl font-bold mb-3">
-            ارفع صور المنتج،{" "}
-            <span className="gradient-text">احصل على صفحة هبوط كاملة</span>
+            {t.uploadTitle}{" "}
+            <span className="gradient-text">{t.uploadTitleHighlight}</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            ارفع عدة صور للمنتج (حتى {MAX_IMAGES} صور) ليفهم الذكاء الاصطناعي منتجك بشكل أفضل
-            ويُنشئ صفحة هبوط احترافية مع صور مطابقة.
+            {t.uploadSubtitle.replace("{max}", String(MAX_IMAGES))}
           </p>
         </div>
 
@@ -370,10 +369,10 @@ export function ProductUpload() {
             <CardContent className="p-4 flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-destructive shrink-0" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-destructive">خطأ في الإنشاء</p>
+                <p className="text-sm font-medium text-destructive">{t.generationError}</p>
                 <p className="text-xs text-muted-foreground">{error}</p>
               </div>
-              <Button variant="outline" size="sm" onClick={() => setError(null)}>إعادة المحاولة</Button>
+              <Button variant="outline" size="sm" onClick={() => setError(null)}>{t.retry}</Button>
             </CardContent>
           </Card>
         )}
@@ -382,15 +381,15 @@ export function ProductUpload() {
         {productImages.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium">{productImages.length} / {MAX_IMAGES} صور مُرفقة</p>
+              <p className="text-sm font-medium">{productImages.length} / {MAX_IMAGES} {t.imagesUploaded}</p>
               <Button variant="ghost" size="sm" onClick={clearProductImages} className="text-destructive hover:text-destructive">
-                حذف الكل
+                {t.deleteAll}
               </Button>
             </div>
             <div className="grid grid-cols-5 gap-3">
               {productImages.map((img, i) => (
                 <div key={i} className="relative group aspect-square rounded-xl overflow-hidden border-2 border-primary/20">
-                  <img src={img.url} alt={`صورة ${i + 1}`} className="w-full h-full object-cover" />
+                  <img src={img.url} alt={`${t.product} ${i + 1}`} className="w-full h-full object-cover" />
                   <button
                     onClick={() => removeProductImage(i)}
                     className="absolute top-1 left-1 w-6 h-6 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
@@ -399,17 +398,16 @@ export function ProductUpload() {
                   </button>
                   {i === 0 && (
                     <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full whitespace-nowrap">
-                      صورة رئيسية
+                      {t.mainImage}
                     </span>
                   )}
                 </div>
               ))}
-              {/* Add more button */}
               {productImages.length < MAX_IMAGES && (
                 <label className="aspect-square rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center cursor-pointer transition-colors">
                   <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileSelect} />
                   <Plus className="w-6 h-6 text-muted-foreground mb-1" />
-                  <span className="text-[10px] text-muted-foreground">إضافة</span>
+                  <span className="text-[10px] text-muted-foreground">{t.add}</span>
                 </label>
               )}
             </div>
@@ -418,7 +416,7 @@ export function ProductUpload() {
               onClick={() => setCurrentView("price")}
             >
               <ArrowRight className="w-5 h-5" />
-              متابعة
+              {t.continue}
             </Button>
           </div>
         )}
@@ -441,14 +439,14 @@ export function ProductUpload() {
                   <Upload className="w-12 h-12 text-primary" />
                 </div>
                 <p className="text-xl font-semibold mb-2">
-                  {isDragging ? "أسقط صورك هنا" : "اسحب وأسقط صور المنتج"}
+                  {isDragging ? t.dropHere : t.dropHere}
                 </p>
-                <p className="text-muted-foreground mb-6">أو انقر لاختيار عدة صور</p>
+                <p className="text-muted-foreground mb-6">{t.orClickToSelect}</p>
                 <Button className="btn-gradient gap-2" size="lg">
                   <ImageIcon className="w-5 h-5" />
-                  اختر صور المنتج
+                  {t.add}
                 </Button>
-                <p className="text-xs text-muted-foreground mt-4">PNG, JPG, WEBP • حتى {MAX_IMAGES} صور • حد أقصى 20MB لكل صورة</p>
+                <p className="text-xs text-muted-foreground mt-4">{t.supportedFormats}</p>
               </label>
             </CardContent>
           </Card>
@@ -456,9 +454,9 @@ export function ProductUpload() {
 
         <div className="grid grid-cols-3 gap-4 text-center">
           {[
-            { icon: "📸", title: "صور متعددة", desc: "ارفع حتى 5 صور لتحليل أدق" },
-            { icon: "🔍", title: "تعرّف ذكي", desc: "التعرف الدقيق على المنتج الأصلي" },
-            { icon: "🚀", title: "جاهز لـ WordPress", desc: "صفحة جاهزة للنشر والبيع" },
+            { icon: "📸", title: dir === "rtl" ? "صور متعددة" : "Photos multiples", desc: dir === "rtl" ? "ارفع حتى 5 صور لتحليل أدق" : "Uploadez jusqu'à 5 photos" },
+            { icon: "🔍", title: dir === "rtl" ? "تعرّف ذكي" : "Analyse IA", desc: dir === "rtl" ? "التعرف الدقيق على المنتج الأصلي" : "Identification précise du produit" },
+            { icon: "🚀", title: dir === "rtl" ? "جاهز لـ WordPress" : "Prêt WordPress", desc: dir === "rtl" ? "صفحة جاهزة للنشر والبيع" : "Page prête à publier" },
           ].map(item => (
             <div key={item.title} className="p-4 rounded-xl bg-card border border-border">
               <div className="text-2xl mb-2">{item.icon}</div>
