@@ -18,6 +18,14 @@ export function ExportPage() {
 
   const { product, pricing, landingPage, design, seo, productImageUrl, generatedImages } = generatedProject;
 
+  const ICON_EMOJI_MAP: Record<string, string> = {
+    Star: '⭐', Shield: '🛡️', Zap: '⚡', Heart: '❤️', Check: '✅',
+    Truck: '🚚', Lock: '🔒', RefreshCw: '🔄', Headphones: '🎧',
+    Monitor: '🖥️', Smartphone: '📱', Palette: '🎨',
+  };
+
+  const mapIconToEmoji = (icon: string) => ICON_EMOJI_MAP[icon] || icon || '⭐';
+
   const generateHTML = (embedImages = false, imageFiles?: Record<string, string>) => {
     const primaryColor = design?.primaryColor || "#7c3aed";
     const accentColor = design?.accentColor || "#06b6d4";
@@ -72,7 +80,7 @@ export function ExportPage() {
       <div class="grid-3">
         ${(landingPage.benefits || []).map(b => `
         <div class="card">
-          <div class="card-icon">${b.icon || '⭐'}</div>
+          <div class="card-icon">${mapIconToEmoji(b.icon)}</div>
           <h3>${b.title}</h3>
           <p>${b.description}</p>
         </div>`).join('')}
