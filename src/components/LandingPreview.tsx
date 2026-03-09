@@ -648,7 +648,7 @@ export function LandingPreview() {
               ))}
             </div>
           </div>
-        </section>
+        </ScrollReveal>
 
         {/* PRICING CTA */}
         <section className="py-16 md:py-20">
