@@ -132,7 +132,7 @@ export default function LandingPage() {
                 )}
               </ul>
               <Button variant="outline" className="w-full" asChild>
-                <Link to="/signup">{t.start}</Link>
+                <Link to="/new">{t.start}</Link>
               </Button>
             </div>
 
@@ -160,7 +160,7 @@ export default function LandingPage() {
                 ))}
               </ul>
               <Button className="w-full btn-gradient" asChild>
-                <Link to="/signup?plan=pro">{t.goToPro}</Link>
+                <Link to="/new">{t.goToPro}</Link>
               </Button>
             </div>
           </div>
