@@ -187,13 +187,13 @@ IMPORTANT pour recommendedTemplate: choisis le template le PLUS adapté au produ
 - Produits lifestyle/beauté → "elegant" ou "suspended"
 - Produits sport/outdoor → "bold"
 - Produits simples/épurés → "minimal"
-`${language === "both" ? `
-Ajoute aussi:
+` + (language === "both" ? `
+Ajoute aussi dans le JSON:
 "frenchVersion": {
     "product": { "name": "...", "shortDescription": "...", "longDescription": "...", "specifications": [...] },
     "landingPage": { "hero": { "headline": "...", "subheadline": "...", "ctaText": "...", "ctaSubtext": "...", "badge": "..." }, "trustBadges": [...], "benefits": [...], "testimonials": [...], "features": [...], "faq": [...], "urgency": {...}, "finalCta": {...} }
-  }` : ""}
-}`;
+  }
+` : "");
 
     const langNote = language === "fr" 
       ? "Génère tout le contenu marketing en français algérien. Devise: Dinar algérien (DZD)."
