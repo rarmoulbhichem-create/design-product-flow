@@ -147,7 +147,7 @@ export function LandingPreview() {
               </div>
               <div className="flex-1 flex justify-center">
                 <div className="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden border border-border shadow-2xl" style={{ boxShadow: `0 25px 60px ${primaryColor}20` }}>
-                  <img src={productImageUrl} alt={product.name} className="w-full h-full object-cover" />
+                  <img src={heroImage} alt={product.name} className="w-full h-full object-cover" />
                 </div>
               </div>
             </div>
