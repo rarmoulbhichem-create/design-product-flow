@@ -157,7 +157,7 @@ export function LandingPreview() {
       <div className={cn(
         "mx-auto transition-all duration-500",
         viewMode === "mobile" ? "max-w-[390px]" : "max-w-full"
-      )} dir="rtl">
+      )} dir={selectedLanguage === "fr" ? "ltr" : "rtl"}>
 
         {/* HERO */}
         <section className="relative overflow-hidden py-16 md:py-24">
