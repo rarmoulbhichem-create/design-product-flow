@@ -235,10 +235,19 @@ export function LandingPreview() {
                   ))}
                 </div>
               </div>
-              <div className="flex-1">
+              <div className="flex-1 space-y-4">
                 <div className="rounded-2xl overflow-hidden border border-border">
-                  <img src={productImageUrl} alt={product.name} className="w-full aspect-square object-cover" />
+                  <img src={detailImage} alt={product.name} className="w-full aspect-square object-cover" />
                 </div>
+                {generatedImages.length > 2 && (
+                  <div className="grid grid-cols-3 gap-3">
+                    {[productImageUrl, ...generatedImages.map(img => img.url)].slice(0, 3).map((imgUrl, i) => (
+                      <div key={i} className="rounded-xl overflow-hidden border border-border aspect-square">
+                        <img src={imgUrl} alt={`${product.name} vue ${i + 1}`} className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
