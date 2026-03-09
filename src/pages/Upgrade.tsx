@@ -218,7 +218,7 @@ export default function UpgradePage() {
               <p className="font-medium mb-1">
                 {isFr ? "💰 Montant à envoyer :" : "💰 المبلغ المطلوب:"}
               </p>
-              <p className="text-lg font-bold">{t.proPrice}</p>
+              <p className="text-lg font-bold">{PLAN_PRICES.pro.toLocaleString()} DA</p>
             </div>
           </CardContent>
         </Card>
