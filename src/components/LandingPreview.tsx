@@ -514,6 +514,7 @@ export function LandingPreview() {
         )}
 
         {/* BENEFITS */}
+        <ScrollReveal>
         <section className="py-16 md:py-20">
           <div className="container mx-auto px-4">
             <h2 className={cn("text-2xl md:text-3xl font-bold text-center mb-12", tmpl.headingClass && !tmpl.headingClass.includes("bg-clip") ? tmpl.headingClass : "")}>
@@ -523,7 +524,8 @@ export function LandingPreview() {
               {(landingPage.benefits || []).map((benefit, i) => {
                 const Icon = ICON_MAP[benefit.icon] || Star;
                 return (
-                  <div key={i} className={cn("text-center", tmpl.featureCardClass)}>
+                  <ScrollReveal key={i} delay={i * 0.1}>
+                  <div className={cn("text-center", tmpl.featureCardClass)}>
                     <div className="space-y-3">
                       <div className="w-12 h-12 mx-auto rounded-xl flex items-center justify-center" style={{ backgroundColor: tmpl.isDark ? `${primaryColor}20` : `${primaryColor}15` }}>
                         <Icon className="w-6 h-6" style={{ color: primaryColor }} />
@@ -532,11 +534,13 @@ export function LandingPreview() {
                       <EditableText value={benefit.description} onChange={v => updateBenefit(i, { description: v })} editMode={editMode} as="p" className={cn("text-sm", tmpl.isDark ? "text-white/60" : "text-muted-foreground")} multiline />
                     </div>
                   </div>
+                  </ScrollReveal>
                 );
               })}
             </div>
           </div>
         </section>
+        </ScrollReveal>
 
         {/* PRODUCT DETAILS + GALLERY */}
         <section className={cn("py-16 md:py-20", tmpl.sectionAltClass)}>
