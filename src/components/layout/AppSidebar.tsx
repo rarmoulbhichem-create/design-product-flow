@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -8,7 +9,10 @@ import {
   Plus,
   Crown,
   HelpCircle,
+  Shield,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Sidebar,
   SidebarContent,
