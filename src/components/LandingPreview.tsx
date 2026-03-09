@@ -131,6 +131,11 @@ export function LandingPreview() {
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
 
   const t = UI_TEXT[lang];
+  const handleSave = async () => {
+    if (!generatedProject) return;
+    const id = await saveProject(generatedProject, undefined, savedProjectId || undefined);
+    if (id) setSavedProjectId(id);
+  };
 
   if (!generatedProject) return null;
 
