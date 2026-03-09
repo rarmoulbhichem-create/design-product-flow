@@ -223,6 +223,9 @@ export function LandingPreview() {
               <Smartphone className="w-4 h-4" />
             </Button>
           </div>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleSave}>
+            <Save className="w-4 h-4" /> {lang === "fr" ? "Sauvegarder" : "حفظ"}
+          </Button>
           <Button className="btn-gradient gap-2" size="sm" onClick={() => setCurrentView("export")}>
             <Download className="w-4 h-4" /> {t.export}
           </Button>
