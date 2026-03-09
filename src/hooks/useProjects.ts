@@ -54,9 +54,9 @@ export function useProjects() {
     const record = {
       user_id: user.id,
       name: projectName,
-      status: "ready",
+      status: "ready" as const,
       template: project.template || "elegant",
-      project_data: project as unknown as Record<string, unknown>,
+      project_data: JSON.parse(JSON.stringify(project)),
       thumbnail_url: project.productImageUrl || null,
     };
 
