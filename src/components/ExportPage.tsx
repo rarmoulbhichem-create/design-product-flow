@@ -164,7 +164,7 @@ export function ExportPage() {
       </div>
       <div class="cta-buttons">
         <button class="btn-primary btn-lg">${landingPage.finalCta?.buttonText || landingPage.hero.ctaText}</button>
-        <a href="https://wa.me/?text=${encodeURIComponent(`مرحباً! أريد طلب: ${product.name}\nالسعر: ${pricing.price.toLocaleString('ar-DZ')} د.ج`)}" target="_blank" class="btn-whatsapp">
+        <a href="https://wa.me/${waPhone}?text=${encodeURIComponent(`مرحباً! أريد طلب: ${product.name}\nالسعر: ${pricing.price.toLocaleString('ar-DZ')} د.ج`)}" target="_blank" class="btn-whatsapp">
           💬 اطلب عبر WhatsApp
         </a>
       </div>
