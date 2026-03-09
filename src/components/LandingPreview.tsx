@@ -17,12 +17,60 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Star, Shield, Zap, Heart, Check, Truck, Lock, RefreshCw, Headphones,
 };
 
-const TEMPLATES: { id: LandingTemplate; name: string; desc: string }[] = [
-  { id: "elegant", name: "أنيق", desc: "تصميم راقي وفاخر" },
-  { id: "bold", name: "جريء", desc: "ألوان قوية وتأثير بصري" },
-  { id: "minimal", name: "بسيط", desc: "نظيف وعصري" },
-  { id: "suspended", name: "معلّق", desc: "تأثير عائم إبداعي" },
+const TEMPLATES: { id: LandingTemplate; name: string; nameAr: string; desc: string }[] = [
+  { id: "elegant", name: "Élégant", nameAr: "أنيق", desc: "تصميم راقي وفاخر" },
+  { id: "bold", name: "Audacieux", nameAr: "جريء", desc: "ألوان قوية وتأثير بصري" },
+  { id: "minimal", name: "Minimal", nameAr: "بسيط", desc: "نظيف وعصري" },
+  { id: "suspended", name: "Suspendu", nameAr: "معلّق", desc: "تأثير عائم إبداعي" },
 ];
+
+// UI translations
+const UI_TEXT = {
+  ar: {
+    new: "جديد",
+    edit: "تحرير",
+    preview: "معاينة",
+    export: "تصدير",
+    editModeBanner: "وضع التحرير — انقر على أي نص أو صورة لتعديله",
+    whyChoose: (name: string) => `لماذا تختار ${name}؟`,
+    productDesc: "وصف المنتج",
+    specifications: "المواصفات",
+    features: "المميزات",
+    testimonials: "ماذا يقول عملاؤنا",
+    basedOn: (count: string) => `بناءً على ${count} تقييم`,
+    reviews: "تقييم",
+    satisfied: "عملاء راضون",
+    verified: "موثّق",
+    faq: "الأسئلة الشائعة",
+    readyToOrder: "هل أنت مستعد للطلب؟",
+    dontMiss: "لا تفوّت هذا العرض الاستثنائي.",
+    getItNow: "احصل عليه الآن",
+    allRights: (brand: string) => `© 2024 ${brand}. جميع الحقوق محفوظة.`,
+    currency: "دج",
+  },
+  fr: {
+    new: "Nouveau",
+    edit: "Modifier",
+    preview: "Aperçu",
+    export: "Exporter",
+    editModeBanner: "Mode édition — Cliquez sur n'importe quel texte ou image pour le modifier",
+    whyChoose: (name: string) => `Pourquoi choisir ${name} ?`,
+    productDesc: "Description du produit",
+    specifications: "Caractéristiques",
+    features: "Fonctionnalités",
+    testimonials: "Ce que disent nos clients",
+    basedOn: (count: string) => `Basé sur ${count} avis`,
+    reviews: "avis",
+    satisfied: "clients satisfaits",
+    verified: "Vérifié",
+    faq: "Questions fréquentes",
+    readyToOrder: "Prêt à commander ?",
+    dontMiss: "Ne manquez pas cette offre exceptionnelle.",
+    getItNow: "Obtenez-le maintenant",
+    allRights: (brand: string) => `© 2024 ${brand}. Tous droits réservés.`,
+    currency: "DA",
+  },
+};
 
 function StarRating({ rating }: { rating: number }) {
   return (
