@@ -111,6 +111,25 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Admin Navigation */}
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Admin</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={location.pathname === "/admin"}>
+                    <Link to="/admin" className="flex items-center gap-3">
+                      <Shield className="w-4 h-4" />
+                      {!collapsed && <span>Administration</span>}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         {/* Secondary Navigation */}
         <SidebarGroup>
           <SidebarGroupLabel>{t.other}</SidebarGroupLabel>
