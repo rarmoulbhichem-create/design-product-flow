@@ -94,11 +94,9 @@ export default function LandingPage() {
             </motion.p>
 
             <motion.div variants={item} className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="btn-gradient gap-2 text-lg h-14 px-8 animate-pulse-glow">
-                <Link to="/new">
-                  {t.startFree}
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
+              <Button size="lg" className="btn-gradient gap-2 text-lg h-14 px-8 animate-pulse-glow" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
+                {t.startFree}
+                <ArrowRight className="w-5 h-5" />
               </Button>
               <Button asChild variant="outline" size="lg" className="text-lg h-14 px-8">
                 <Link to="/templates">{t.seeExamples}</Link>
