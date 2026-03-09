@@ -152,20 +152,20 @@ export function LandingPreview() {
       <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border px-4 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => { resetApp(); setCurrentView("upload"); }}>
-            <ArrowLeft className="w-4 h-4 ml-1" /> جديد
+            <ArrowLeft className="w-4 h-4 ml-1" /> {t.new}
           </Button>
           <div className="h-6 w-px bg-border" />
           <div className="flex gap-1">
-            {TEMPLATES.map(t => (
+            {TEMPLATES.map(tmpl => (
               <Button
-                key={t.id}
-                variant={generatedProject.template === t.id ? "default" : "ghost"}
+                key={tmpl.id}
+                variant={generatedProject.template === tmpl.id ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setSelectedTemplate(t.id)}
-                className="text-xs"
+                onClick={() => setSelectedTemplate(tmpl.id)}
+                className="text-xs gap-1"
               >
-                <Palette className="w-3 h-3 ml-1" />
-                {t.name}
+                <Palette className="w-3 h-3" />
+                {selectedLanguage === "fr" ? tmpl.name : tmpl.nameAr}
               </Button>
             ))}
           </div>
@@ -179,7 +179,7 @@ export function LandingPreview() {
             className="gap-1.5"
           >
             {editMode ? <Eye className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
-            {editMode ? "معاينة" : "تحرير"}
+            {editMode ? t.preview : t.edit}
           </Button>
           <div className="flex border border-border rounded-lg overflow-hidden">
             <Button variant={viewMode === "desktop" ? "secondary" : "ghost"} size="sm" onClick={() => setViewMode("desktop")} className="rounded-none">
@@ -190,7 +190,7 @@ export function LandingPreview() {
             </Button>
           </div>
           <Button className="btn-gradient gap-2" size="sm" onClick={() => setCurrentView("export")}>
-            <Download className="w-4 h-4" /> تصدير
+            <Download className="w-4 h-4" /> {t.export}
           </Button>
         </div>
       </div>
@@ -199,7 +199,7 @@ export function LandingPreview() {
       {editMode && (
         <div className="bg-primary/10 border-b border-primary/20 px-4 py-2 text-center text-sm text-primary font-medium">
           <Pencil className="w-3.5 h-3.5 inline ml-1" />
-          وضع التحرير — انقر على أي نص أو صورة لتعديله
+          {t.editModeBanner}
         </div>
       )}
 
