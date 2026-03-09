@@ -1,42 +1,44 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, FolderOpen, Clock, MoreHorizontal, ExternalLink } from "lucide-react";
+import { Plus, FolderOpen, Clock, Trash2, ExternalLink, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-// Mock data for projects
-const MOCK_PROJECTS = [
-  {
-    id: "1",
-    name: "Sneakers Urban 2024",
-    status: "ready",
-    thumbnail: "/placeholder.svg",
-    updatedAt: { ar: "منذ ساعتين", fr: "Il y a 2 heures" },
-  },
-  {
-    id: "2",
-    name: "Montre Luxe Edition",
-    status: "draft",
-    thumbnail: "/placeholder.svg",
-    updatedAt: { ar: "أمس", fr: "Hier" },
-  },
-  {
-    id: "3",
-    name: "Sac à Main Premium",
-    status: "generating",
-    thumbnail: "/placeholder.svg",
-    updatedAt: { ar: "منذ 3 أيام", fr: "Il y a 3 jours" },
-  },
-];
+import { useProjects } from "@/hooks/useProjects";
+import { formatDistanceToNow } from "date-fns";
+import { fr, ar } from "date-fns/locale";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function DashboardPage() {
   const { t, lang, dir } = useLanguage();
+  const { projects, loading, deleteProject } = useProjects();
+  const navigate = useNavigate();
 
   const STATUS_LABELS: Record<string, { label: string; className: string }> = {
     draft: { label: t.draft, className: "bg-muted text-muted-foreground" },
     generating: { label: t.generating, className: "bg-yellow-500/20 text-yellow-500" },
     ready: { label: t.ready, className: "bg-green-500/20 text-green-500" },
     exported: { label: t.exported, className: "bg-primary/20 text-primary" },
+  };
+
+  const timeAgo = (date: string) => {
+    try {
+      return formatDistanceToNow(new Date(date), {
+        addSuffix: true,
+        locale: lang === "ar" ? ar : fr,
+      });
+    } catch {
+      return date;
+    }
   };
 
   return (
@@ -61,7 +63,7 @@ export default function DashboardPage() {
           <CardContent className="p-6">
             <p className="text-sm text-muted-foreground">{t.landingsCount}</p>
             <p className="text-3xl font-bold mt-1">
-              0 <span className="text-lg text-muted-foreground">/ 1</span>
+              {projects.length} <span className="text-lg text-muted-foreground">/ ∞</span>
             </p>
           </CardContent>
         </Card>
@@ -88,30 +90,63 @@ export default function DashboardPage() {
             <FolderOpen className="w-5 h-5" />
             {t.recentProjects}
           </h2>
-          <Button variant="ghost" asChild>
-            <Link to="/projects">{t.viewAll}</Link>
-          </Button>
         </div>
 
-        {MOCK_PROJECTS.length > 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : projects.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {MOCK_PROJECTS.map((project) => (
+            {projects.map((project) => (
               <Card key={project.id} className="group overflow-hidden hover:border-primary/50 transition-all">
                 {/* Thumbnail */}
                 <div className="aspect-video bg-secondary relative overflow-hidden">
                   <img
-                    src={project.thumbnail}
+                    src={project.thumbnail_url || "/placeholder.svg"}
                     alt={project.name}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-3">
-                    <Button size="sm" variant="secondary" className="gap-1">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="gap-1"
+                      onClick={() => {
+                        // Navigate to /new and load project (via state)
+                        navigate("/new", { state: { loadProject: project } });
+                      }}
+                    >
                       <ExternalLink className="w-3 h-3" />
                       {t.open}
                     </Button>
-                    <Button size="icon" variant="secondary" className="h-8 w-8">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="icon" variant="destructive" className="h-8 w-8">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            {lang === "fr" ? "Supprimer ce projet ?" : "حذف هذا المشروع؟"}
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {lang === "fr"
+                              ? "Cette action est irréversible."
+                              : "لا يمكن التراجع عن هذا الإجراء."}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>
+                            {lang === "fr" ? "Annuler" : "إلغاء"}
+                          </AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteProject(project.id)}>
+                            {lang === "fr" ? "Supprimer" : "حذف"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
                 <CardContent className="p-4">
@@ -120,13 +155,15 @@ export default function DashboardPage() {
                       <h3 className="font-medium truncate">{project.name}</h3>
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                         <Clock className="w-3 h-3" />
-                        {project.updatedAt[lang]}
+                        {timeAgo(project.updated_at)}
                       </p>
                     </div>
                     <span
-                      className={`text-xs px-2 py-0.5 rounded-full ${STATUS_LABELS[project.status].className}`}
+                      className={`text-xs px-2 py-0.5 rounded-full ${
+                        (STATUS_LABELS[project.status] || STATUS_LABELS.ready).className
+                      }`}
                     >
-                      {STATUS_LABELS[project.status].label}
+                      {(STATUS_LABELS[project.status] || STATUS_LABELS.ready).label}
                     </span>
                   </div>
                 </CardContent>
