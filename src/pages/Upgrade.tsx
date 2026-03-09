@@ -131,6 +131,59 @@ export default function UpgradePage() {
     }
   };
 
+  if (loadingPending) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">{isFr ? "Chargement..." : "جاري التحميل..."}</p>
+      </div>
+    );
+  }
+
+  if (pendingRequest && !submitted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" dir={dir}>
+        <Card className="w-full max-w-md text-center">
+          <CardContent className="pt-8 pb-8 space-y-4">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+              <Clock className="w-8 h-8 text-primary" />
+            </div>
+            <h2 className="text-xl font-bold">
+              {isFr ? "Demande en cours de traitement" : "الطلب قيد المعالجة"}
+            </h2>
+            <p className="text-muted-foreground">
+              {isFr
+                ? "Votre paiement est en cours de vérification. Vous serez notifié une fois votre plan activé."
+                : "دفعتك قيد التحقق. ستتلقى إشعاراً بمجرد تفعيل خطتك."}
+            </p>
+            {pendingRequest.transaction_id && (
+              <p className="text-sm text-muted-foreground">
+                {isFr ? "Transaction :" : "المعاملة :"} <code className="bg-muted px-2 py-0.5 rounded">{pendingRequest.transaction_id}</code>
+              </p>
+            )}
+            <div className="flex flex-col gap-2 pt-4">
+              <Button asChild variant="outline">
+                <Link to="/dashboard">
+                  {isFr ? "Retour au tableau de bord" : "العودة إلى لوحة التحكم"}
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                className="text-destructive hover:text-destructive"
+                onClick={handleCancel}
+                disabled={cancelling}
+              >
+                <XCircle className="w-4 h-4 mr-2" />
+                {cancelling
+                  ? (isFr ? "Annulation..." : "جاري الإلغاء...")
+                  : (isFr ? "Annuler la demande" : "إلغاء الطلب")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" dir={dir}>
