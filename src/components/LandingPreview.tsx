@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Star, Shield, Zap, Heart, Check, ChevronDown, ChevronUp,
   Truck, Lock, RefreshCw, Headphones, ArrowLeft, Download,
-  Monitor, Smartphone, Palette, Pencil, Eye,
+  Monitor, Smartphone, Palette, Pencil, Eye, Undo2, Redo2,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
