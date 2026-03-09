@@ -792,6 +792,7 @@ export function LandingPreview() {
                 currency={pricing.currency}
                 inline
                 label={selectedLanguage === "fr" ? "Commander via WhatsApp" : "اطلب عبر WhatsApp"}
+                phoneNumber={generatedProject.whatsappNumber}
               />
             </div>
             <EditableText
