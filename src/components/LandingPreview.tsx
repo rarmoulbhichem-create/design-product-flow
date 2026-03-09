@@ -164,7 +164,7 @@ export function LandingPreview() {
           <div className="absolute inset-0 opacity-10" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }} />
           <div className="relative container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
-              <div className="flex-1 text-center md:text-right space-y-6">
+              <div className={cn("flex-1 text-center space-y-6", selectedLanguage === "fr" ? "md:text-left" : "md:text-right")}>
                 {landingPage.hero.badge && (
                   <Badge className="text-sm px-4 py-1" style={{ backgroundColor: `${primaryColor}20`, color: primaryColor, border: `1px solid ${primaryColor}40` }}>
                     <EditableText value={landingPage.hero.badge} onChange={v => updateHero({ badge: v })} editMode={editMode} />
