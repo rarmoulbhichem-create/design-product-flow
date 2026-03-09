@@ -160,7 +160,7 @@ export default function LandingPage() {
                 ))}
               </ul>
               <Button className="w-full btn-gradient" asChild>
-                <Link to="/signup?plan=pro">{t.goToPro}</Link>
+                <Link to="/new">{t.goToPro}</Link>
               </Button>
             </div>
           </div>
