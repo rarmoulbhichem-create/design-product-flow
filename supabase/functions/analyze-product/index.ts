@@ -167,14 +167,29 @@ ${lang.testimonialNames}
     "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
   },
   "design": {
-    "primaryColor": "#hex",
-    "secondaryColor": "#hex",
-    "accentColor": "#hex",
-    "backgroundColor": "#0a0a0f",
-    "textColor": "#ffffff",
-    "mood": "premium"
-  }${language === "both" ? `,
-  "frenchVersion": {
+    "primaryColor": "#hex - couleur dominante extraite du produit",
+    "secondaryColor": "#hex - complémentaire",
+    "accentColor": "#hex - pour les CTA",
+    "backgroundColor": "#hex",
+    "textColor": "#hex",
+    "mood": "premium | playful | professional | luxury | sporty | natural | tech | urban"
+  },
+  "recommendedTemplate": "elegant | bold | minimal | suspended | luxury | fashion | tech | flashsale | neon | editorial"
+}
+
+IMPORTANT pour recommendedTemplate: choisis le template le PLUS adapté au produit:
+- Produits tech/gadgets → "tech"
+- Mode/vêtements/accessoires → "fashion"
+- Produits premium/luxe/bijoux → "luxury"
+- Produits avec promo forte (>30%) → "flashsale"
+- Produits créatifs/artistiques → "neon"
+- Produits professionnels/business → "editorial"
+- Produits lifestyle/beauté → "elegant" ou "suspended"
+- Produits sport/outdoor → "bold"
+- Produits simples/épurés → "minimal"
+`${language === "both" ? `
+Ajoute aussi:
+"frenchVersion": {
     "product": { "name": "...", "shortDescription": "...", "longDescription": "...", "specifications": [...] },
     "landingPage": { "hero": { "headline": "...", "subheadline": "...", "ctaText": "...", "ctaSubtext": "...", "badge": "..." }, "trustBadges": [...], "benefits": [...], "testimonials": [...], "features": [...], "faq": [...], "urgency": {...}, "finalCta": {...} }
   }` : ""}
