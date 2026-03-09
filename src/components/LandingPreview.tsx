@@ -43,7 +43,7 @@ function formatPrice(price: number, currency: string) {
 }
 
 export function LandingPreview() {
-  const { generatedProject, setCurrentView, setSelectedTemplate, resetApp, updateGeneratedProject } = useApp();
+  const { generatedProject, setCurrentView, setSelectedTemplate, resetApp, updateGeneratedProject, selectedLanguage } = useApp();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [editMode, setEditMode] = useState(false);
