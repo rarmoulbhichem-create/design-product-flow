@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { InterfaceLanguage, translations, getDirection } from "@/lib/i18n";
 
+type Translations = typeof translations.ar | typeof translations.fr;
+
 interface LanguageContextType {
   lang: InterfaceLanguage;
   setLang: (lang: InterfaceLanguage) => void;
-  t: typeof translations.ar;
+  t: Translations;
   dir: "rtl" | "ltr";
 }
 
