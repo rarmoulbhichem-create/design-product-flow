@@ -12,6 +12,7 @@ import LoginPage from "@/pages/Login";
 import DashboardPage from "@/pages/Dashboard";
 import NewProjectPage from "@/pages/NewProject";
 import UpgradePage from "@/pages/Upgrade";
+import AdminPage from "@/pages/Admin";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
                 <Route path="/projects" element={<DashboardPage />} />
                 <Route path="/settings" element={<DashboardPage />} />
                 <Route path="/upgrade" element={<UpgradePage />} />
+                <Route path="/admin" element={<AdminPage />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
