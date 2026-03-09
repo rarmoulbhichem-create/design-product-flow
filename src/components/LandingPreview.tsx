@@ -6,24 +6,19 @@ import {
   Star, Shield, Zap, Heart, Check, ChevronDown, ChevronUp,
   Truck, Lock, RefreshCw, Headphones, ArrowLeft, Download,
   Monitor, Smartphone, Palette, Pencil, Eye, Undo2, Redo2,
+  Clock, Flame,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import type { LandingTemplate } from "@/types/project";
 import { EditableText } from "./EditableText";
 import { EditableImage } from "./EditableImage";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { TEMPLATE_STYLES, TEMPLATE_LIST, type TemplateStyle } from "@/lib/templates";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Star, Shield, Zap, Heart, Check, Truck, Lock, RefreshCw, Headphones,
 };
-
-const TEMPLATES: { id: LandingTemplate; name: string; nameAr: string; desc: string }[] = [
-  { id: "elegant", name: "Élégant", nameAr: "أنيق", desc: "تصميم راقي وفاخر" },
-  { id: "bold", name: "Audacieux", nameAr: "جريء", desc: "ألوان قوية وتأثير بصري" },
-  { id: "minimal", name: "Minimal", nameAr: "بسيط", desc: "نظيف وعصري" },
-  { id: "suspended", name: "Suspendu", nameAr: "معلّق", desc: "تأثير عائم إبداعي" },
-];
 
 // UI translations
 const UI_TEXT = {
@@ -48,6 +43,7 @@ const UI_TEXT = {
     getItNow: "احصل عليه الآن",
     allRights: (brand: string) => `© 2024 ${brand}. جميع الحقوق محفوظة.`,
     currency: "دج",
+    moreTemplates: "المزيد",
   },
   fr: {
     new: "Nouveau",
@@ -70,16 +66,18 @@ const UI_TEXT = {
     getItNow: "Obtenez-le maintenant",
     allRights: (brand: string) => `© 2024 ${brand}. Tous droits réservés.`,
     currency: "DA",
+    moreTemplates: "Plus",
   },
 };
 
-function StarRating({ rating }: { rating: number }) {
+function StarRating({ rating, style }: { rating: number; style?: TemplateStyle }) {
+  const starColor = style?.isDark ? "fill-amber-400 text-amber-400" : "fill-yellow-400 text-yellow-400";
   return (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map(i => (
         <Star
           key={i}
-          className={cn("w-4 h-4", i <= rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30")}
+          className={cn("w-4 h-4", i <= rating ? starColor : "text-muted-foreground/30")}
         />
       ))}
     </div>
@@ -91,25 +89,54 @@ function formatPrice(price: number, currency: string) {
   return `${price}€`;
 }
 
+function CountdownTimer() {
+  const [time, setTime] = useState({ h: 2, m: 47, s: 33 });
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(prev => {
+        let { h, m, s } = prev;
+        s--;
+        if (s < 0) { s = 59; m--; }
+        if (m < 0) { m = 59; h--; }
+        if (h < 0) { h = 23; m = 59; s = 59; }
+        return { h, m, s };
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    <div className="flex items-center justify-center gap-2 text-2xl font-mono font-bold">
+      <div className="bg-red-600 text-white px-3 py-2 rounded-lg">{pad(time.h)}</div>
+      <span className="text-red-500">:</span>
+      <div className="bg-red-600 text-white px-3 py-2 rounded-lg">{pad(time.m)}</div>
+      <span className="text-red-500">:</span>
+      <div className="bg-red-600 text-white px-3 py-2 rounded-lg">{pad(time.s)}</div>
+    </div>
+  );
+}
+
 export function LandingPreview() {
   const { generatedProject, setCurrentView, setSelectedTemplate, resetApp, updateGeneratedProject, selectedLanguage, undo, redo, canUndo, canRedo } = useApp();
   const { lang } = useLanguage();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const [editMode, setEditMode] = useState(false);
+  const [showAllTemplates, setShowAllTemplates] = useState(false);
 
   const t = UI_TEXT[lang];
 
   if (!generatedProject) return null;
 
   const { product, pricing, landingPage, design, productImageUrl, generatedImages = [] } = generatedProject;
+  const tmpl = TEMPLATE_STYLES[generatedProject.template] || TEMPLATE_STYLES.elegant;
 
   const heroImage = generatedImages[0]?.url || productImageUrl;
   const detailImage = generatedImages[1]?.url || productImageUrl;
   const currency = pricing?.currency || "DZD";
 
-  const primaryColor = design?.primaryColor || "#7c3aed";
-  const accentColor = design?.accentColor || "#06b6d4";
+  const primaryColor = tmpl.overrideColors?.primary || design?.primaryColor || "#7c3aed";
+  const accentColor = tmpl.overrideColors?.accent || design?.accentColor || "#06b6d4";
 
   // Helpers for updating nested fields
   const updateProduct = (patch: Partial<typeof product>) =>
@@ -148,6 +175,9 @@ export function LandingPreview() {
       ...p, product: { ...p.product, specifications: p.product.specifications.map((s, idx) => idx === i ? { ...s, [field]: val } : s) }
     }));
 
+  // Show first 4 or all templates
+  const visibleTemplates = showAllTemplates ? TEMPLATE_LIST : TEMPLATE_LIST.slice(0, 5);
+
   return (
     <div className="animate-fade-in">
       {/* Toolbar */}
@@ -157,49 +187,38 @@ export function LandingPreview() {
             <ArrowLeft className="w-4 h-4 ml-1" /> {t.new}
           </Button>
           <div className="h-6 w-px bg-border" />
-          <div className="flex gap-1">
-            {TEMPLATES.map(tmpl => (
+          <div className="flex gap-1 flex-wrap">
+            {visibleTemplates.map(tmplItem => (
               <Button
-                key={tmpl.id}
-                variant={generatedProject.template === tmpl.id ? "default" : "ghost"}
+                key={tmplItem.id}
+                variant={generatedProject.template === tmplItem.id ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setSelectedTemplate(tmpl.id)}
+                onClick={() => setSelectedTemplate(tmplItem.id)}
                 className="text-xs gap-1"
               >
                 <Palette className="w-3 h-3" />
-                {selectedLanguage === "fr" ? tmpl.name : tmpl.nameAr}
+                {selectedLanguage === "fr" ? tmplItem.name : tmplItem.nameAr}
               </Button>
             ))}
+            {!showAllTemplates && TEMPLATE_LIST.length > 5 && (
+              <Button variant="outline" size="sm" onClick={() => setShowAllTemplates(true)} className="text-xs">
+                +{TEMPLATE_LIST.length - 5} {t.moreTemplates}
+              </Button>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Undo/Redo buttons */}
           {editMode && (
             <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={undo}
-                disabled={!canUndo}
-                className="gap-1"
-                title="Undo"
-              >
+              <Button variant="outline" size="sm" onClick={undo} disabled={!canUndo} title="Undo">
                 <Undo2 className="w-4 h-4" />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={redo}
-                disabled={!canRedo}
-                className="gap-1"
-                title="Redo"
-              >
+              <Button variant="outline" size="sm" onClick={redo} disabled={!canRedo} title="Redo">
                 <Redo2 className="w-4 h-4" />
               </Button>
               <div className="h-6 w-px bg-border" />
             </>
           )}
-          {/* Edit mode toggle */}
           <Button
             variant={editMode ? "default" : "outline"}
             size="sm"
@@ -231,20 +250,75 @@ export function LandingPreview() {
         </div>
       )}
 
-      {/* Landing Page Content - RTL Arabic */}
+      {/* Landing Page Content */}
       <div className={cn(
         "mx-auto transition-all duration-500",
-        viewMode === "mobile" ? "max-w-[390px]" : "max-w-full"
+        viewMode === "mobile" ? "max-w-[390px]" : "max-w-full",
+        tmpl.bgClass,
+        tmpl.fontClass,
       )} dir={selectedLanguage === "fr" ? "ltr" : "rtl"}>
 
         {/* HERO */}
-        <section className="relative overflow-hidden py-16 md:py-24">
-          <div className="absolute inset-0 opacity-10" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }} />
+        <section className={cn("relative overflow-hidden", tmpl.heroExtraClass || "py-16 md:py-24")}>
+          {!tmpl.isDark && (
+            <div className="absolute inset-0 opacity-10" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }} />
+          )}
           <div className="relative container mx-auto px-4">
-            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
-              <div className={cn("flex-1 text-center space-y-6", selectedLanguage === "fr" ? "md:text-left" : "md:text-right")}>
+            {/* Flash sale countdown */}
+            {tmpl.urgencyStyle === "pulse" && landingPage.urgency && (
+              <div className="mb-8 text-center space-y-3">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-bold animate-pulse">
+                  <Flame className="w-5 h-5" />
+                  {landingPage.urgency.text}
+                  <Flame className="w-5 h-5" />
+                </div>
+                <CountdownTimer />
+              </div>
+            )}
+
+            {/* Hero content - varies by layout */}
+            {tmpl.heroLayout === "fullwidth" ? (
+              // Fashion / fullwidth: large image with overlay text
+              <div className="relative">
+                <EditableImage
+                  src={heroImage}
+                  alt={product.name}
+                  editMode={editMode}
+                  onChange={url => updateImage(0, url)}
+                  className="w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden"
+                  imgClassName="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+                  <div className="p-8 md:p-16 text-white max-w-2xl space-y-4">
+                    {landingPage.hero.badge && (
+                      <span className={cn("inline-block px-3 py-1 text-sm", tmpl.badgeClass)}>
+                        <EditableText value={landingPage.hero.badge} onChange={v => updateHero({ badge: v })} editMode={editMode} />
+                      </span>
+                    )}
+                    <EditableText
+                      value={landingPage.hero.headline}
+                      onChange={v => updateHero({ headline: v })}
+                      editMode={editMode}
+                      as="h1"
+                      className={cn("text-3xl md:text-5xl lg:text-6xl leading-tight", tmpl.headingClass)}
+                    />
+                    <div className="flex items-baseline gap-3">
+                      <span className="text-3xl font-bold">{formatPrice(pricing.price, currency)}</span>
+                      {pricing.originalPrice > pricing.price && (
+                        <span className="text-xl text-white/60 line-through">{formatPrice(pricing.originalPrice, currency)}</span>
+                      )}
+                    </div>
+                    <Button size="lg" className={cn("text-lg px-8 py-6", tmpl.ctaClass)}>
+                      <EditableText value={landingPage.hero.ctaText} onChange={v => updateHero({ ctaText: v })} editMode={editMode} />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : tmpl.heroLayout === "centered" ? (
+              // Centered layout
+              <div className="text-center space-y-8 max-w-4xl mx-auto">
                 {landingPage.hero.badge && (
-                  <Badge className="text-sm px-4 py-1" style={{ backgroundColor: `${primaryColor}20`, color: primaryColor, border: `1px solid ${primaryColor}40` }}>
+                  <Badge className={cn("text-sm px-4 py-1", tmpl.badgeClass)} style={!tmpl.isDark ? { backgroundColor: `${primaryColor}20`, color: primaryColor, border: `1px solid ${primaryColor}40` } : undefined}>
                     <EditableText value={landingPage.hero.badge} onChange={v => updateHero({ badge: v })} editMode={editMode} />
                   </Badge>
                 )}
@@ -253,7 +327,7 @@ export function LandingPreview() {
                   onChange={v => updateHero({ headline: v })}
                   editMode={editMode}
                   as="h1"
-                  className="text-3xl md:text-5xl lg:text-6xl font-bold leading-tight"
+                  className={cn("text-3xl md:text-5xl lg:text-7xl leading-tight", tmpl.headingClass)}
                 />
                 <EditableText
                   value={landingPage.hero.subheadline}
@@ -261,65 +335,153 @@ export function LandingPreview() {
                   editMode={editMode}
                   as="p"
                   multiline
-                  className="text-lg md:text-xl text-muted-foreground max-w-lg"
+                  className={cn("text-lg md:text-xl max-w-2xl mx-auto", tmpl.isDark ? "text-white/60" : "text-muted-foreground")}
                 />
-                <div className="space-y-3">
-                  <div className="flex items-baseline gap-3 justify-center md:justify-start">
-                    <EditableText
-                      value={String(pricing.price)}
-                      onChange={v => updatePricing({ price: Number(v) || 0 })}
-                      editMode={editMode}
-                      as="span"
-                      type="number"
-                      className="text-4xl font-bold"
-                      style={{ color: primaryColor }}
-                    />
-                    {!editMode && <span className="text-4xl font-bold" style={{ color: primaryColor }}> {currency === "DZD" ? "دج" : "€"}</span>}
+                <div className="space-y-4">
+                  <div className="flex items-baseline gap-3 justify-center">
+                    <span className="text-4xl md:text-5xl font-bold" style={{ color: primaryColor }}>
+                      {formatPrice(pricing.price, currency)}
+                    </span>
                     {pricing.originalPrice > pricing.price && (
+                      <span className={cn("text-xl line-through", tmpl.isDark ? "text-white/40" : "text-muted-foreground")}>{formatPrice(pricing.originalPrice, currency)}</span>
+                    )}
+                    {pricing.discountPercent > 0 && <Badge variant="destructive">-{pricing.discountPercent}%</Badge>}
+                  </div>
+                  <Button size="lg" className={cn("text-lg px-8 py-6", tmpl.ctaClass)} style={!tmpl.ctaClass.includes("bg-") ? { background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` } : undefined}>
+                    <EditableText value={landingPage.hero.ctaText} onChange={v => updateHero({ ctaText: v })} editMode={editMode} />
+                  </Button>
+                </div>
+                <div className="flex justify-center pt-4">
+                  <EditableImage
+                    src={heroImage}
+                    alt={product.name}
+                    editMode={editMode}
+                    onChange={url => updateImage(0, url)}
+                    className={cn("relative w-full max-w-lg aspect-square overflow-hidden", tmpl.heroImageClass)}
+                  />
+                </div>
+              </div>
+            ) : tmpl.heroLayout === "overlay" ? (
+              // Overlay: image as background
+              <div className="relative min-h-[70vh] flex items-center">
+                <div className="absolute inset-0 rounded-3xl overflow-hidden opacity-30">
+                  <img src={heroImage} alt={product.name} className="w-full h-full object-cover" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent rounded-3xl" />
+                <div className={cn("relative z-10 max-w-xl space-y-6 p-8 md:p-16", selectedLanguage === "fr" ? "text-left" : "text-right")}>
+                  {landingPage.hero.badge && (
+                    <span className={cn("inline-block px-4 py-1.5 text-sm", tmpl.badgeClass)}>
+                      <EditableText value={landingPage.hero.badge} onChange={v => updateHero({ badge: v })} editMode={editMode} />
+                    </span>
+                  )}
+                  <EditableText
+                    value={landingPage.hero.headline}
+                    onChange={v => updateHero({ headline: v })}
+                    editMode={editMode}
+                    as="h1"
+                    className={cn("text-3xl md:text-5xl lg:text-6xl leading-tight text-white", tmpl.headingClass)}
+                  />
+                  <EditableText
+                    value={landingPage.hero.subheadline}
+                    onChange={v => updateHero({ subheadline: v })}
+                    editMode={editMode}
+                    as="p"
+                    multiline
+                    className="text-lg text-white/70 max-w-lg"
+                  />
+                  <div className="space-y-3">
+                    <div className="flex items-baseline gap-3">
+                      <span className="text-4xl font-bold" style={{ color: primaryColor }}>{formatPrice(pricing.price, currency)}</span>
+                      {pricing.originalPrice > pricing.price && (
+                        <span className="text-xl text-white/40 line-through">{formatPrice(pricing.originalPrice, currency)}</span>
+                      )}
+                      {pricing.discountPercent > 0 && <Badge variant="destructive">-{pricing.discountPercent}%</Badge>}
+                    </div>
+                    <Button size="lg" className={cn("text-lg px-8 py-6", tmpl.ctaClass)}>
+                      <EditableText value={landingPage.hero.ctaText} onChange={v => updateHero({ ctaText: v })} editMode={editMode} />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Split layout (default)
+              <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16">
+                <div className={cn("flex-1 text-center space-y-6", selectedLanguage === "fr" ? "md:text-left" : "md:text-right")}>
+                  {landingPage.hero.badge && (
+                    <Badge className={cn("text-sm px-4 py-1", tmpl.badgeClass)} style={!tmpl.isDark ? { backgroundColor: `${primaryColor}20`, color: primaryColor, border: `1px solid ${primaryColor}40` } : undefined}>
+                      <EditableText value={landingPage.hero.badge} onChange={v => updateHero({ badge: v })} editMode={editMode} />
+                    </Badge>
+                  )}
+                  <EditableText
+                    value={landingPage.hero.headline}
+                    onChange={v => updateHero({ headline: v })}
+                    editMode={editMode}
+                    as="h1"
+                    className={cn("text-3xl md:text-5xl lg:text-6xl leading-tight", tmpl.headingClass)}
+                  />
+                  <EditableText
+                    value={landingPage.hero.subheadline}
+                    onChange={v => updateHero({ subheadline: v })}
+                    editMode={editMode}
+                    as="p"
+                    multiline
+                    className={cn("text-lg md:text-xl max-w-lg", tmpl.isDark ? "text-white/60" : "text-muted-foreground")}
+                  />
+                  <div className="space-y-3">
+                    <div className="flex items-baseline gap-3 justify-center md:justify-start">
                       <EditableText
-                        value={String(pricing.originalPrice)}
-                        onChange={v => updatePricing({ originalPrice: Number(v) || 0 })}
+                        value={String(pricing.price)}
+                        onChange={v => updatePricing({ price: Number(v) || 0 })}
                         editMode={editMode}
                         as="span"
                         type="number"
-                        className="text-xl text-muted-foreground line-through"
+                        className="text-4xl font-bold"
+                        style={{ color: primaryColor }}
                       />
-                    )}
-                    {pricing.discountPercent > 0 && (
-                      <Badge variant="destructive">-{pricing.discountPercent}%</Badge>
+                      {!editMode && <span className="text-4xl font-bold" style={{ color: primaryColor }}> {currency === "DZD" ? "دج" : "€"}</span>}
+                      {pricing.originalPrice > pricing.price && (
+                        <EditableText
+                          value={String(pricing.originalPrice)}
+                          onChange={v => updatePricing({ originalPrice: Number(v) || 0 })}
+                          editMode={editMode}
+                          as="span"
+                          type="number"
+                          className={cn("text-xl line-through", tmpl.isDark ? "text-white/40" : "text-muted-foreground")}
+                        />
+                      )}
+                      {pricing.discountPercent > 0 && <Badge variant="destructive">-{pricing.discountPercent}%</Badge>}
+                    </div>
+                    <Button size="lg" className={cn("text-lg px-8 py-6", tmpl.ctaClass)} style={!tmpl.ctaClass.includes("bg-") ? { background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` } : undefined}>
+                      <EditableText value={landingPage.hero.ctaText} onChange={v => updateHero({ ctaText: v })} editMode={editMode} />
+                    </Button>
+                    {landingPage.hero.ctaSubtext && (
+                      <EditableText value={landingPage.hero.ctaSubtext} onChange={v => updateHero({ ctaSubtext: v })} editMode={editMode} as="p" className={cn("text-sm", tmpl.isDark ? "text-white/50" : "text-muted-foreground")} />
                     )}
                   </div>
-                  <Button size="lg" className="text-lg px-8 py-6" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }}>
-                    <EditableText value={landingPage.hero.ctaText} onChange={v => updateHero({ ctaText: v })} editMode={editMode} />
-                  </Button>
-                  {landingPage.hero.ctaSubtext && (
-                    <EditableText value={landingPage.hero.ctaSubtext} onChange={v => updateHero({ ctaSubtext: v })} editMode={editMode} as="p" className="text-sm text-muted-foreground" />
-                  )}
+                </div>
+                <div className="flex-1 flex justify-center">
+                  <EditableImage
+                    src={heroImage}
+                    alt={product.name}
+                    editMode={editMode}
+                    onChange={url => updateImage(0, url)}
+                    className={cn("relative w-full max-w-md aspect-square overflow-hidden", tmpl.heroImageClass)}
+                  />
                 </div>
               </div>
-              <div className="flex-1 flex justify-center">
-                <EditableImage
-                  src={heroImage}
-                  alt={product.name}
-                  editMode={editMode}
-                  onChange={url => updateImage(0, url)}
-                  className="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden border border-border shadow-2xl"
-                  style={{ boxShadow: `0 25px 60px ${primaryColor}20` }}
-                />
-              </div>
-            </div>
+            )}
           </div>
         </section>
 
         {/* TRUST BADGES */}
-        <section className="py-6 border-y border-border bg-card/50">
+        <section className={cn("py-6 border-y", tmpl.isDark ? "border-white/10 bg-white/[0.02]" : "border-border bg-card/50")}>
           <div className="container mx-auto px-4">
             <div className="flex flex-wrap justify-center gap-6 md:gap-12">
               {(landingPage.trustBadges || []).map((badge, i) => {
                 const icons = [Truck, Lock, RefreshCw, Headphones];
                 const Icon = icons[i % icons.length];
                 return (
-                  <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div key={i} className={cn("flex items-center gap-2 text-sm", tmpl.isDark ? "text-white/60" : "text-muted-foreground")}>
                     <Icon className="w-4 h-4" style={{ color: primaryColor }} />
                     <EditableText
                       value={badge}
@@ -337,19 +499,19 @@ export function LandingPreview() {
 
         {/* SOCIAL PROOF */}
         {landingPage.socialProof && (
-          <section className="py-12 bg-card/30">
+          <section className={cn("py-12", tmpl.sectionAltClass)}>
             <div className="container mx-auto px-4 text-center">
               <div className="flex flex-wrap justify-center gap-8 md:gap-16">
                 <div>
                   <div className="flex items-center justify-center gap-1 mb-1">
-                    <StarRating rating={Math.round(landingPage.socialProof.rating)} />
+                    <StarRating rating={Math.round(landingPage.socialProof.rating)} style={tmpl} />
                     <span className="font-bold mr-1">{landingPage.socialProof.rating}/5</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{landingPage.socialProof.reviewCount.toLocaleString("ar-DZ")} {t.reviews}</p>
+                  <p className={cn("text-sm", tmpl.isDark ? "text-white/50" : "text-muted-foreground")}>{landingPage.socialProof.reviewCount.toLocaleString("ar-DZ")} {t.reviews}</p>
                 </div>
                 <div>
                   <p className="text-3xl font-bold" style={{ color: primaryColor }}>{landingPage.socialProof.satisfactionRate}%</p>
-                  <p className="text-sm text-muted-foreground">{t.satisfied}</p>
+                  <p className={cn("text-sm", tmpl.isDark ? "text-white/50" : "text-muted-foreground")}>{t.satisfied}</p>
                 </div>
               </div>
             </div>
@@ -359,22 +521,22 @@ export function LandingPreview() {
         {/* BENEFITS */}
         <section className="py-16 md:py-20">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+            <h2 className={cn("text-2xl md:text-3xl font-bold text-center mb-12", tmpl.headingClass && !tmpl.headingClass.includes("bg-clip") ? tmpl.headingClass : "")}>
               {t.whyChoose(product.name)}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {(landingPage.benefits || []).map((benefit, i) => {
                 const Icon = ICON_MAP[benefit.icon] || Star;
                 return (
-                  <Card key={i} className="text-center p-6 hover:border-primary/50 transition-all hover:-translate-y-1">
-                    <CardContent className="p-0 space-y-3">
-                      <div className="w-12 h-12 mx-auto rounded-xl flex items-center justify-center" style={{ backgroundColor: `${primaryColor}15` }}>
+                  <div key={i} className={cn("text-center", tmpl.featureCardClass)}>
+                    <div className="space-y-3">
+                      <div className="w-12 h-12 mx-auto rounded-xl flex items-center justify-center" style={{ backgroundColor: tmpl.isDark ? `${primaryColor}20` : `${primaryColor}15` }}>
                         <Icon className="w-6 h-6" style={{ color: primaryColor }} />
                       </div>
                       <EditableText value={benefit.title} onChange={v => updateBenefit(i, { title: v })} editMode={editMode} as="h3" className="font-semibold" />
-                      <EditableText value={benefit.description} onChange={v => updateBenefit(i, { description: v })} editMode={editMode} as="p" className="text-sm text-muted-foreground" multiline />
-                    </CardContent>
-                  </Card>
+                      <EditableText value={benefit.description} onChange={v => updateBenefit(i, { description: v })} editMode={editMode} as="p" className={cn("text-sm", tmpl.isDark ? "text-white/60" : "text-muted-foreground")} multiline />
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -382,17 +544,17 @@ export function LandingPreview() {
         </section>
 
         {/* PRODUCT DETAILS + GALLERY */}
-        <section className="py-16 md:py-20 bg-card/30">
+        <section className={cn("py-16 md:py-20", tmpl.sectionAltClass)}>
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row gap-12 items-start">
               <div className="flex-1">
-                <h2 className="text-2xl md:text-3xl font-bold mb-6">{t.productDesc}</h2>
-                <EditableText value={product.longDescription} onChange={v => updateProduct({ longDescription: v })} editMode={editMode} as="p" multiline className="text-muted-foreground leading-relaxed mb-8" />
+                <h2 className={cn("text-2xl md:text-3xl font-bold mb-6", tmpl.headingClass && !tmpl.headingClass.includes("bg-clip") ? tmpl.headingClass : "")}>{t.productDesc}</h2>
+                <EditableText value={product.longDescription} onChange={v => updateProduct({ longDescription: v })} editMode={editMode} as="p" multiline className={cn("leading-relaxed mb-8", tmpl.isDark ? "text-white/70" : "text-muted-foreground")} />
                 <h3 className="text-xl font-semibold mb-4">{t.specifications}</h3>
                 <div className="space-y-3">
                   {(product.specifications || []).map((spec, i) => (
-                    <div key={i} className="flex justify-between py-2 border-b border-border last:border-0">
-                      <EditableText value={spec.label} onChange={v => updateSpec(i, "label", v)} editMode={editMode} as="span" className="text-muted-foreground" />
+                    <div key={i} className={cn("flex justify-between py-2 border-b last:border-0", tmpl.isDark ? "border-white/10" : "border-border")}>
+                      <EditableText value={spec.label} onChange={v => updateSpec(i, "label", v)} editMode={editMode} as="span" className={tmpl.isDark ? "text-white/60" : "text-muted-foreground"} />
                       <EditableText value={spec.value} onChange={v => updateSpec(i, "value", v)} editMode={editMode} as="span" className="font-medium" />
                     </div>
                   ))}
@@ -404,7 +566,7 @@ export function LandingPreview() {
                   alt={product.name}
                   editMode={editMode}
                   onChange={url => updateImage(1, url)}
-                  className="rounded-2xl overflow-hidden border border-border"
+                  className={cn("overflow-hidden", tmpl.heroImageClass)}
                   imgClassName="w-full aspect-square object-cover"
                 />
                 {(generatedImages.length > 0 || productImageUrl) && (
@@ -416,7 +578,7 @@ export function LandingPreview() {
                         alt={`${product.name} ${i + 1}`}
                         editMode={editMode}
                         onChange={url => updateImage(i === 0 ? -1 : i - 1, url)}
-                        className="rounded-xl overflow-hidden border border-border aspect-square"
+                        className={cn("overflow-hidden aspect-square", tmpl.borderRadius, tmpl.isDark ? "border border-white/10" : "border border-border")}
                       />
                     ))}
                   </div>
@@ -429,17 +591,17 @@ export function LandingPreview() {
         {/* FEATURES */}
         <section className="py-16 md:py-20">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">{t.features}</h2>
+            <h2 className={cn("text-2xl md:text-3xl font-bold text-center mb-12", tmpl.headingClass && !tmpl.headingClass.includes("bg-clip") ? tmpl.headingClass : "")}>{t.features}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {(landingPage.features || []).map((feature, i) => (
-                <div key={i} className="p-5 rounded-xl border border-border hover:border-primary/30 transition-all">
+                <div key={i} className={tmpl.featureCardClass}>
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${primaryColor}15` }}>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: tmpl.isDark ? `${primaryColor}20` : `${primaryColor}15` }}>
                       <Check className="w-4 h-4" style={{ color: primaryColor }} />
                     </div>
                     <div>
                       <EditableText value={feature.title} onChange={v => updateFeature(i, { title: v })} editMode={editMode} as="h3" className="font-semibold mb-1" />
-                      <EditableText value={feature.description} onChange={v => updateFeature(i, { description: v })} editMode={editMode} as="p" className="text-sm text-muted-foreground" multiline />
+                      <EditableText value={feature.description} onChange={v => updateFeature(i, { description: v })} editMode={editMode} as="p" className={cn("text-sm", tmpl.isDark ? "text-white/60" : "text-muted-foreground")} multiline />
                     </div>
                   </div>
                 </div>
@@ -449,27 +611,27 @@ export function LandingPreview() {
         </section>
 
         {/* TESTIMONIALS */}
-        <section className="py-16 md:py-20 bg-card/30">
+        <section className={cn("py-16 md:py-20", tmpl.sectionAltClass)}>
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">{t.testimonials}</h2>
+            <h2 className={cn("text-2xl md:text-3xl font-bold text-center mb-4", tmpl.headingClass && !tmpl.headingClass.includes("bg-clip") ? tmpl.headingClass : "")}>{t.testimonials}</h2>
             <div className="flex justify-center mb-12">
               <div className="flex items-center gap-2">
-                <StarRating rating={5} />
-                <span className="text-sm text-muted-foreground">
+                <StarRating rating={5} style={tmpl} />
+                <span className={cn("text-sm", tmpl.isDark ? "text-white/50" : "text-muted-foreground")}>
                   {t.basedOn(landingPage.socialProof?.reviewCount?.toLocaleString("ar-DZ") || "0")}
                 </span>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {(landingPage.testimonials || []).map((testimonial, i) => (
-                <Card key={i} className="p-5">
-                  <CardContent className="p-0 space-y-3">
-                    <StarRating rating={testimonial.rating} />
+                <div key={i} className={tmpl.testimonialCardClass}>
+                  <div className="space-y-3">
+                    <StarRating rating={testimonial.rating} style={tmpl} />
                     <EditableText value={testimonial.text} onChange={v => updateTestimonial(i, { text: v })} editMode={editMode} as="p" className="text-sm" multiline />
-                    <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <div className={cn("flex items-center justify-between pt-2 border-t", tmpl.isDark ? "border-white/10" : "border-border")}>
                       <div>
                         <EditableText value={testimonial.name} onChange={v => updateTestimonial(i, { name: v })} editMode={editMode} as="p" className="font-medium text-sm" />
-                        <EditableText value={testimonial.location} onChange={v => updateTestimonial(i, { location: v })} editMode={editMode} as="p" className="text-xs text-muted-foreground" />
+                        <EditableText value={testimonial.location} onChange={v => updateTestimonial(i, { location: v })} editMode={editMode} as="p" className={cn("text-xs", tmpl.isDark ? "text-white/50" : "text-muted-foreground")} />
                       </div>
                       {testimonial.verified && (
                         <Badge variant="secondary" className="text-xs">
@@ -477,9 +639,9 @@ export function LandingPreview() {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">{testimonial.date}</p>
-                  </CardContent>
-                </Card>
+                    <p className={cn("text-xs", tmpl.isDark ? "text-white/40" : "text-muted-foreground")}>{testimonial.date}</p>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -488,62 +650,56 @@ export function LandingPreview() {
         {/* PRICING CTA */}
         <section className="py-16 md:py-20">
           <div className="container mx-auto px-4">
-            <Card className="max-w-2xl mx-auto overflow-hidden" style={{ borderColor: `${primaryColor}30` }}>
-              <CardContent className="p-8 md:p-12 text-center space-y-6">
-                {landingPage.urgency && (
-                  <Badge variant="destructive" className="text-sm px-4 py-1">
-                    {landingPage.urgency.text}
-                  </Badge>
+            <div className={cn("max-w-2xl mx-auto overflow-hidden text-center p-8 md:p-12 space-y-6", tmpl.cardClass)} style={!tmpl.isDark ? { borderColor: `${primaryColor}30` } : undefined}>
+              {landingPage.urgency && (
+                <Badge variant="destructive" className={cn("text-sm px-4 py-1", tmpl.urgencyStyle === "pulse" ? "animate-pulse" : "")}>
+                  {landingPage.urgency.text}
+                </Badge>
+              )}
+              {tmpl.urgencyStyle === "pulse" && <CountdownTimer />}
+              <EditableText value={product.name} onChange={v => updateProduct({ name: v })} editMode={editMode} as="h2" className="text-3xl font-bold" />
+              <EditableText value={product.shortDescription} onChange={v => updateProduct({ shortDescription: v })} editMode={editMode} as="p" className={tmpl.isDark ? "text-white/60" : "text-muted-foreground"} multiline />
+              <div className="flex items-baseline justify-center gap-3">
+                <span className="text-5xl font-bold" style={{ color: primaryColor }}>{formatPrice(pricing.price, currency)}</span>
+                {pricing.originalPrice > pricing.price && (
+                  <span className={cn("text-2xl line-through", tmpl.isDark ? "text-white/40" : "text-muted-foreground")}>{formatPrice(pricing.originalPrice, currency)}</span>
                 )}
-                <EditableText value={product.name} onChange={v => updateProduct({ name: v })} editMode={editMode} as="h2" className="text-3xl font-bold" />
-                <EditableText value={product.shortDescription} onChange={v => updateProduct({ shortDescription: v })} editMode={editMode} as="p" className="text-muted-foreground" multiline />
-                <div className="flex items-baseline justify-center gap-3">
-                  <EditableText
-                    value={String(pricing.price)}
-                    onChange={v => updatePricing({ price: Number(v) || 0 })}
-                    editMode={editMode}
-                    as="span"
-                    type="number"
-                    className="text-5xl font-bold"
-                    style={{ color: primaryColor }}
-                  />
-                  {!editMode && <span className="text-5xl font-bold" style={{ color: primaryColor }}> {currency === "DZD" ? "دج" : "€"}</span>}
-                  {pricing.originalPrice > pricing.price && (
-                    <span className="text-2xl text-muted-foreground line-through">{formatPrice(pricing.originalPrice, currency)}</span>
-                  )}
-                </div>
-                <EditableText value={pricing.shippingInfo} onChange={v => updatePricing({ shippingInfo: v })} editMode={editMode} as="p" className="text-sm text-muted-foreground" />
-                <Button size="lg" className="text-lg px-12 py-6 w-full md:w-auto" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }}>
-                  <EditableText value={landingPage.hero.ctaText} onChange={v => updateHero({ ctaText: v })} editMode={editMode} />
-                </Button>
-                <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
-                  <Shield className="w-4 h-4" />
-                  <EditableText value={pricing.guarantee} onChange={v => updatePricing({ guarantee: v })} editMode={editMode} />
-                </p>
-                {landingPage.urgency?.stockText && (
-                  <p className="text-sm font-medium" style={{ color: primaryColor }}>{landingPage.urgency.stockText}</p>
-                )}
-              </CardContent>
-            </Card>
+              </div>
+              <EditableText value={pricing.shippingInfo} onChange={v => updatePricing({ shippingInfo: v })} editMode={editMode} as="p" className={cn("text-sm", tmpl.isDark ? "text-white/50" : "text-muted-foreground")} />
+              <Button size="lg" className={cn("text-lg px-12 py-6 w-full md:w-auto", tmpl.ctaClass)} style={!tmpl.ctaClass.includes("bg-") ? { background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` } : undefined}>
+                <EditableText value={landingPage.hero.ctaText} onChange={v => updateHero({ ctaText: v })} editMode={editMode} />
+              </Button>
+              <p className={cn("text-sm flex items-center justify-center gap-2", tmpl.isDark ? "text-white/50" : "text-muted-foreground")}>
+                <Shield className="w-4 h-4" />
+                <EditableText value={pricing.guarantee} onChange={v => updatePricing({ guarantee: v })} editMode={editMode} />
+              </p>
+              {landingPage.urgency?.stockText && (
+                <p className="text-sm font-medium" style={{ color: primaryColor }}>{landingPage.urgency.stockText}</p>
+              )}
+            </div>
           </div>
         </section>
 
         {/* FAQ */}
-        <section className="py-16 md:py-20 bg-card/30">
+        <section className={cn("py-16 md:py-20", tmpl.sectionAltClass)}>
           <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">{t.faq}</h2>
+            <h2 className={cn("text-2xl md:text-3xl font-bold text-center mb-12", tmpl.headingClass && !tmpl.headingClass.includes("bg-clip") ? tmpl.headingClass : "")}>{t.faq}</h2>
             <div className="space-y-3">
               {(landingPage.faq || []).map((item, i) => (
-                <div key={i} className="border border-border rounded-xl overflow-hidden">
+                <div key={i} className={cn("overflow-hidden", tmpl.faqClass)}>
                   <button
                     onClick={() => !editMode && setOpenFaq(openFaq === i ? null : i)}
-                    className={cn("w-full flex items-center justify-between p-5 hover:bg-card/50 transition-colors", selectedLanguage === "fr" ? "text-left" : "text-right")}
+                    className={cn(
+                      "w-full flex items-center justify-between p-5 transition-colors",
+                      tmpl.isDark ? "hover:bg-white/5" : "hover:bg-card/50",
+                      selectedLanguage === "fr" ? "text-left" : "text-right"
+                    )}
                   >
                     <EditableText value={item.question} onChange={v => updateFaq(i, { question: v })} editMode={editMode} as="span" className="font-medium pl-4" />
                     {openFaq === i ? <ChevronUp className="w-5 h-5 shrink-0" /> : <ChevronDown className="w-5 h-5 shrink-0" />}
                   </button>
                   {(openFaq === i || editMode) && (
-                    <div className="px-5 pb-5 text-muted-foreground text-sm animate-fade-in">
+                    <div className={cn("px-5 pb-5 text-sm animate-fade-in", tmpl.isDark ? "text-white/60" : "text-muted-foreground")}>
                       <EditableText value={item.answer} onChange={v => updateFaq(i, { answer: v })} editMode={editMode} as="div" multiline />
                     </div>
                   )}
@@ -555,24 +711,25 @@ export function LandingPreview() {
 
         {/* FINAL CTA */}
         <section className="py-16 md:py-24 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-5" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }} />
+          {!tmpl.isDark && <div className="absolute inset-0 opacity-5" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }} />}
+          {tmpl.isDark && <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />}
           <div className="relative container mx-auto px-4 text-center space-y-6">
             <EditableText
               value={landingPage.finalCta?.headline || t.readyToOrder}
               onChange={v => updateFinalCta({ headline: v })}
               editMode={editMode}
               as="h2"
-              className="text-3xl md:text-4xl font-bold"
+              className={cn("text-3xl md:text-4xl font-bold", tmpl.headingClass && !tmpl.headingClass.includes("bg-clip") ? tmpl.headingClass : "")}
             />
             <EditableText
               value={landingPage.finalCta?.subheadline || t.dontMiss}
               onChange={v => updateFinalCta({ subheadline: v })}
               editMode={editMode}
               as="p"
-              className="text-lg text-muted-foreground max-w-xl mx-auto"
+              className={cn("text-lg max-w-xl mx-auto", tmpl.isDark ? "text-white/60" : "text-muted-foreground")}
               multiline
             />
-            <Button size="lg" className="text-lg px-12 py-6" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }}>
+            <Button size="lg" className={cn("text-lg px-12 py-6", tmpl.ctaClass)} style={!tmpl.ctaClass.includes("bg-") ? { background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` } : undefined}>
               <EditableText
                 value={landingPage.finalCta?.buttonText || landingPage.hero.ctaText}
                 onChange={v => updateFinalCta({ buttonText: v })}
@@ -584,14 +741,14 @@ export function LandingPreview() {
               onChange={v => updateFinalCta({ guaranteeText: v })}
               editMode={editMode}
               as="p"
-              className="text-sm text-muted-foreground"
+              className={cn("text-sm", tmpl.isDark ? "text-white/50" : "text-muted-foreground")}
             />
           </div>
         </section>
 
         {/* FOOTER */}
-        <footer className="py-8 border-t border-border text-center">
-          <p className="text-sm text-muted-foreground">
+        <footer className={cn("py-8 border-t text-center", tmpl.isDark ? "border-white/10" : "border-border")}>
+          <p className={cn("text-sm", tmpl.isDark ? "text-white/40" : "text-muted-foreground")}>
             {t.allRights(product.brand || product.name)}
           </p>
         </footer>

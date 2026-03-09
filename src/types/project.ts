@@ -112,7 +112,7 @@ export interface GeneratedProject {
   template: LandingTemplate;
 }
 
-export type LandingTemplate = "suspended" | "elegant" | "bold" | "minimal";
+export type LandingTemplate = "elegant" | "bold" | "minimal" | "suspended" | "luxury" | "fashion" | "tech" | "flashsale" | "neon" | "editorial";
 
 export type LandingLanguage = "ar" | "fr" | "both";
 
