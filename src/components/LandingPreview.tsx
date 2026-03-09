@@ -613,7 +613,7 @@ export function LandingPreview() {
         </section>
         </ScrollReveal>
 
-        {/* TESTIMONIALS */}
+        <ScrollReveal>
         <section className={cn("py-16 md:py-20", tmpl.sectionAltClass)}>
           <div className="container mx-auto px-4">
             <h2 className={cn("text-2xl md:text-3xl font-bold text-center mb-4", tmpl.headingClass && !tmpl.headingClass.includes("bg-clip") ? tmpl.headingClass : "")}>{t.testimonials}</h2>
