@@ -467,6 +467,7 @@ export function LandingPreview() {
         </section>
 
         {/* TRUST BADGES */}
+        <ScrollReveal>
         <section className={cn("py-6 border-y", tmpl.isDark ? "border-white/10 bg-white/[0.02]" : "border-border bg-card/50")}>
           <div className="container mx-auto px-4">
             <div className="flex flex-wrap justify-center gap-6 md:gap-12">
@@ -489,6 +490,7 @@ export function LandingPreview() {
             </div>
           </div>
         </section>
+        </ScrollReveal>
 
         {/* SOCIAL PROOF */}
         {landingPage.socialProof && (
