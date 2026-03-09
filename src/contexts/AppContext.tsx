@@ -21,6 +21,7 @@ interface AppState {
 interface AppContextType extends AppState {
   setCurrentView: (view: AppState["currentView"]) => void;
   setGeneratedProject: (project: GeneratedProject | null) => void;
+  updateGeneratedProject: (updater: (prev: GeneratedProject) => GeneratedProject) => void;
   addProductImage: (url: string, base64: string, file?: File) => void;
   removeProductImage: (index: number) => void;
   clearProductImages: () => void;
