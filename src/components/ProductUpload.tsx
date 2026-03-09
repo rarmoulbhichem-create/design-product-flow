@@ -3,19 +3,20 @@ import { useApp } from "@/contexts/AppContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Upload, Loader2, Sparkles, CheckCircle, AlertCircle, ArrowRight, Image as ImageIcon } from "lucide-react";
+import { Upload, Loader2, Sparkles, CheckCircle, AlertCircle, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const GENERATION_STEPS = [
-  { label: "Analyse du produit par l'IA...", progress: 15 },
-  { label: "Identification des caractéristiques...", progress: 30 },
-  { label: "Recherche des informations produit...", progress: 45 },
-  { label: "Génération du contenu marketing...", progress: 60 },
-  { label: "Création des sections de la page...", progress: 75 },
-  { label: "Optimisation SEO & conversion...", progress: 90 },
-  { label: "Finalisation de la landing page...", progress: 100 },
+  { label: "Analyse du produit par l'IA...", progress: 10 },
+  { label: "Identification des caractéristiques...", progress: 25 },
+  { label: "Génération du contenu marketing...", progress: 40 },
+  { label: "Création des images produit...", progress: 55 },
+  { label: "Génération des visuels lifestyle...", progress: 70 },
+  { label: "Assemblage de la landing page...", progress: 85 },
+  { label: "Optimisation SEO & finalisation...", progress: 95 },
+  { label: "Landing page générée !", progress: 100 },
 ];
 
 export function ProductUpload() {
@@ -58,7 +59,7 @@ export function ProductUpload() {
       } else {
         clearInterval(interval);
       }
-    }, 2500);
+    }, 3000);
     return interval;
   };
 
@@ -77,33 +78,48 @@ export function ProductUpload() {
       setProductImage(url, base64);
       setPreviewUrl(url);
 
-      const { data, error: fnError } = await supabase.functions.invoke("analyze-product", {
+      // Step 1: Analyze product
+      const { data: analysisData, error: analysisError } = await supabase.functions.invoke("analyze-product", {
         body: { imageBase64: base64 },
+      });
+
+      if (analysisError) throw new Error(analysisError.message || "Erreur d'analyse");
+      if (analysisData?.error) throw new Error(analysisData.error);
+
+      // Step 2: Generate images in parallel
+      const { data: imageData } = await supabase.functions.invoke("generate-product-images", {
+        body: {
+          imageBase64: base64,
+          productName: analysisData.product?.name,
+          productCategory: analysisData.product?.category,
+          designMood: analysisData.design?.mood,
+          primaryColor: analysisData.design?.primaryColor,
+        },
       });
 
       clearInterval(progressInterval);
 
-      if (fnError) throw new Error(fnError.message || "Erreur d'analyse");
-      if (data?.error) throw new Error(data.error);
+      const generatedImages = imageData?.images || [];
 
       setGenerationProgress(100);
       setGenerationStep("Landing page générée !");
 
       setGeneratedProject({
-        product: data.product,
-        pricing: data.pricing,
-        landingPage: data.landingPage,
-        seo: data.seo,
-        design: data.design,
+        product: analysisData.product,
+        pricing: analysisData.pricing,
+        landingPage: analysisData.landingPage,
+        seo: analysisData.seo,
+        design: analysisData.design,
         productImageUrl: url,
+        generatedImages,
         template: selectedTemplate,
       });
 
       setTimeout(() => {
         setIsGenerating(false);
         setCurrentView("preview");
-        toast.success("Landing page générée avec succès !");
-      }, 1000);
+        toast.success(`Landing page générée avec ${generatedImages.length} images !`);
+      }, 800);
     } catch (err) {
       clearInterval(progressInterval);
       console.error("Generation error:", err);
@@ -117,7 +133,6 @@ export function ProductUpload() {
   const handleFiles = async (files: FileList | File[]) => {
     const file = Array.from(files).find(f => f.type.startsWith("image/"));
     if (!file) return;
-    
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
     await handleGenerate(file);
@@ -152,7 +167,6 @@ export function ProductUpload() {
               <img src={previewUrl} alt="Product" className="w-full h-full object-cover" />
             </div>
           )}
-          
           <div>
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
               <Sparkles className="w-8 h-8 text-primary animate-pulse" />
@@ -160,12 +174,10 @@ export function ProductUpload() {
             <h2 className="text-2xl font-bold mb-2">Génération en cours...</h2>
             <p className="text-muted-foreground">{generationStep}</p>
           </div>
-
           <div className="space-y-2">
             <Progress value={generationProgress} className="h-3" />
             <p className="text-sm text-muted-foreground">{generationProgress}%</p>
           </div>
-
           <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground">
             {GENERATION_STEPS.map((step, i) => (
               <div key={i} className={cn(
@@ -199,8 +211,8 @@ export function ProductUpload() {
             <span className="gradient-text">obtenez votre landing page</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            L'IA analyse votre produit, génère le contenu marketing, les prix, les avis, 
-            le SEO et crée une page WordPress prête à vendre.
+            L'IA analyse votre produit, génère le contenu, crée des images professionnelles 
+            et assemble une page prête à vendre sur WordPress.
           </p>
         </div>
 
@@ -212,9 +224,7 @@ export function ProductUpload() {
                 <p className="text-sm font-medium text-destructive">Erreur de génération</p>
                 <p className="text-xs text-muted-foreground">{error}</p>
               </div>
-              <Button variant="outline" size="sm" onClick={() => setError(null)}>
-                Réessayer
-              </Button>
+              <Button variant="outline" size="sm" onClick={() => setError(null)}>Réessayer</Button>
             </CardContent>
           </Card>
         )}
@@ -222,22 +232,14 @@ export function ProductUpload() {
         <Card
           className={cn(
             "border-2 border-dashed transition-all duration-300 cursor-pointer group",
-            isDragging
-              ? "border-primary bg-primary/5 scale-[1.02]"
-              : "border-border hover:border-primary/50 hover:bg-primary/[0.02]"
+            isDragging ? "border-primary bg-primary/5 scale-[1.02]" : "border-border hover:border-primary/50 hover:bg-primary/[0.02]"
           )}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
           <CardContent className="flex flex-col items-center justify-center py-16">
-            <input
-              type="file"
-              id="photo-upload"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileSelect}
-            />
+            <input type="file" id="photo-upload" accept="image/*" className="hidden" onChange={handleFileSelect} />
             <label htmlFor="photo-upload" className="flex flex-col items-center cursor-pointer">
               <div className="p-6 rounded-2xl bg-primary/10 mb-6 group-hover:bg-primary/15 transition-colors">
                 <Upload className="w-12 h-12 text-primary" />
@@ -250,9 +252,7 @@ export function ProductUpload() {
                 <ImageIcon className="w-5 h-5" />
                 Choisir une image
               </Button>
-              <p className="text-xs text-muted-foreground mt-4">
-                PNG, JPG, WEBP • Max 20MB
-              </p>
+              <p className="text-xs text-muted-foreground mt-4">PNG, JPG, WEBP • Max 20MB</p>
             </label>
           </CardContent>
         </Card>
@@ -260,7 +260,7 @@ export function ProductUpload() {
         <div className="grid grid-cols-3 gap-4 text-center">
           {[
             { icon: "🔍", title: "Analyse IA", desc: "Identification automatique du produit" },
-            { icon: "✍️", title: "Contenu marketing", desc: "Textes, prix, avis, FAQ générés" },
+            { icon: "🎨", title: "Images générées", desc: "Visuels professionnels créés par l'IA" },
             { icon: "🚀", title: "Export WordPress", desc: "Page prête à publier" },
           ].map(item => (
             <div key={item.title} className="p-4 rounded-xl bg-card border border-border">

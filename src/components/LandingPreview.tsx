@@ -42,7 +42,12 @@ export function LandingPreview() {
 
   if (!generatedProject) return null;
 
-  const { product, pricing, landingPage, design, productImageUrl } = generatedProject;
+  const { product, pricing, landingPage, design, productImageUrl, generatedImages = [] } = generatedProject;
+  
+  // Use generated images for different sections, fallback to original
+  const heroImage = generatedImages[0]?.url || productImageUrl;
+  const detailImage = generatedImages[1]?.url || productImageUrl;
+  const galleryImage = generatedImages[2]?.url || productImageUrl;
 
   const primaryColor = design?.primaryColor || "#7c3aed";
   const accentColor = design?.accentColor || "#06b6d4";
@@ -142,7 +147,7 @@ export function LandingPreview() {
               </div>
               <div className="flex-1 flex justify-center">
                 <div className="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden border border-border shadow-2xl" style={{ boxShadow: `0 25px 60px ${primaryColor}20` }}>
-                  <img src={productImageUrl} alt={product.name} className="w-full h-full object-cover" />
+                  <img src={heroImage} alt={product.name} className="w-full h-full object-cover" />
                 </div>
               </div>
             </div>
@@ -230,10 +235,19 @@ export function LandingPreview() {
                   ))}
                 </div>
               </div>
-              <div className="flex-1">
+              <div className="flex-1 space-y-4">
                 <div className="rounded-2xl overflow-hidden border border-border">
-                  <img src={productImageUrl} alt={product.name} className="w-full aspect-square object-cover" />
+                  <img src={detailImage} alt={product.name} className="w-full aspect-square object-cover" />
                 </div>
+                {generatedImages.length > 2 && (
+                  <div className="grid grid-cols-3 gap-3">
+                    {[productImageUrl, ...generatedImages.map(img => img.url)].slice(0, 3).map((imgUrl, i) => (
+                      <div key={i} className="rounded-xl overflow-hidden border border-border aspect-square">
+                        <img src={imgUrl} alt={`${product.name} vue ${i + 1}`} className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
