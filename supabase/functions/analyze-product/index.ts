@@ -11,16 +11,33 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, imageUrl, userPrice } = await req.json();
+    const { imageBase64, additionalImages, imageUrl, userPrice } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const imageContent = imageBase64 
-      ? { type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }
-      : { type: "image_url", image_url: { url: imageUrl } };
+    // Build image content array - main image + additional images
+    const imageContents: any[] = [];
+    
+    if (imageBase64) {
+      imageContents.push({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageBase64}` } });
+    } else if (imageUrl) {
+      imageContents.push({ type: "image_url", image_url: { url: imageUrl } });
+    }
+
+    // Add additional images
+    if (additionalImages && Array.isArray(additionalImages)) {
+      for (const img of additionalImages) {
+        imageContents.push({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${img}` } });
+      }
+    }
+
+    const imageCount = imageContents.length;
+    const multiImageNote = imageCount > 1 
+      ? `لديك ${imageCount} صور للمنتج. حلل جميع الصور معاً للحصول على فهم شامل ودقيق للمنتج - من زوايا مختلفة، تفاصيل، ألوان، وملحقات. استخدم كل المعلومات من جميع الصور لإنشاء وصف شامل ودقيق.`
+      : `حلل صورة المنتج هذه بدقة.`;
 
     const priceInstruction = userPrice 
       ? `السعر المحدد من المستخدم: ${userPrice} دج (دينار جزائري). استخدم هذا السعر بالضبط. اقترح سعراً أصلياً أعلى لإظهار الخصم.`
@@ -28,14 +45,15 @@ serve(async (req) => {
 
     const systemPrompt = `أنت خبير عالمي في التجارة الإلكترونية والتسويق الرقمي وكتابة المحتوى التحويلي.
 
-مهمتك: حلل صورة المنتج هذه بدقة متناهية.
+مهمتك: حلل صور المنتج هذه بدقة متناهية.
 
 ## تعليمات حاسمة:
-1. **تعرّف على المنتج الحقيقي بالضبط** - ابحث في ذاكرتك عن هذا المنتج تحديداً. حدد الاسم الدقيق، العلامة التجارية الحقيقية، والموديل إن أمكن. لا تخمن - حدد المنتج كما هو في الصورة.
-2. **المحتوى يجب أن يصف هذا المنتج بالتحديد** وليس منتجاً مشابهاً. كل وصف يجب أن يتطابق مع ما تراه في الصورة.
-3. **كل المحتوى باللغة العربية** - العناوين، الأوصاف، الشهادات، الأسئلة الشائعة، كل شيء بالعربية الفصحى الحديثة.
-4. **العملة: دينار جزائري (دج)** - ${priceInstruction}
-5. **الشهادات بأسماء جزائرية** - استخدم أسماء وألقاب جزائرية ومدن جزائرية حقيقية.
+1. **تعرّف على المنتج الحقيقي بالضبط** - ابحث في ذاكرتك عن هذا المنتج تحديداً. حدد الاسم الدقيق، العلامة التجارية الحقيقية، والموديل إن أمكن. لا تخمن - حدد المنتج كما هو في الصور.
+2. **إذا كانت هناك عدة صور، ادمج المعلومات من كلها** - كل صورة تعطيك زاوية أو تفاصيل إضافية. استخدم الكل لبناء صورة كاملة ودقيقة عن المنتج.
+3. **المحتوى يجب أن يصف هذا المنتج بالتحديد** وليس منتجاً مشابهاً. كل وصف يجب أن يتطابق مع ما تراه في الصور.
+4. **كل المحتوى باللغة العربية** - العناوين، الأوصاف، الشهادات، الأسئلة الشائعة، كل شيء بالعربية الفصحى الحديثة.
+5. **العملة: دينار جزائري (دج)** - ${priceInstruction}
+6. **الشهادات بأسماء جزائرية** - استخدم أسماء وألقاب جزائرية ومدن جزائرية حقيقية.
 
 أجب فقط بكائن JSON صالح، بدون markdown، بدون backticks:
 
@@ -75,10 +93,10 @@ serve(async (req) => {
     },
     "trustBadges": ["توصيل مجاني", "دفع آمن", "ضمان 30 يوم", "دعم 24/7"],
     "benefits": [
-      {"icon": "Star", "title": "عنوان الميزة", "description": "وصف الميزة"},
-      {"icon": "Shield", "title": "عنوان الميزة", "description": "وصف الميزة"},
-      {"icon": "Zap", "title": "عنوان الميزة", "description": "وصف الميزة"},
-      {"icon": "Heart", "title": "عنوان الميزة", "description": "وصف الميزة"}
+      {"icon": "⭐", "title": "عنوان الميزة", "description": "وصف الميزة"},
+      {"icon": "🛡️", "title": "عنوان الميزة", "description": "وصف الميزة"},
+      {"icon": "⚡", "title": "عنوان الميزة", "description": "وصف الميزة"},
+      {"icon": "💎", "title": "عنوان الميزة", "description": "وصف الميزة"}
     ],
     "socialProof": {
       "rating": 4.8,
@@ -134,6 +152,11 @@ serve(async (req) => {
   }
 }`;
 
+    const userMessage: any[] = [
+      { type: "text", text: `${multiImageNote} تعرّف على المنتج الحقيقي بالضبط كما يظهر في الصور - اسمه، علامته التجارية، مواصفاته الحقيقية. ابحث في معرفتك عن هذا المنتج تحديداً وليس منتجاً مشابهاً. أنشئ كل المحتوى التسويقي لصفحة هبوط بيع عالية التحويل. كل المحتوى باللغة العربية والعملة بالدينار الجزائري.` },
+      ...imageContents
+    ];
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -144,13 +167,7 @@ serve(async (req) => {
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { 
-            role: "user", 
-            content: [
-              { type: "text", text: "حلل صورة المنتج هذه بعمق. تعرّف على المنتج الحقيقي بالضبط كما يظهر في الصورة - اسمه، علامته التجارية، مواصفاته الحقيقية. ابحث في معرفتك عن هذا المنتج تحديداً وليس منتجاً مشابهاً. أنشئ كل المحتوى التسويقي لصفحة هبوط بيع عالية التحويل. كل المحتوى باللغة العربية والعملة بالدينار الجزائري." },
-              imageContent
-            ]
-          }
+          { role: "user", content: userMessage }
         ],
       }),
     });

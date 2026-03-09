@@ -4,13 +4,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Upload, Loader2, Sparkles, CheckCircle, AlertCircle, Image as ImageIcon, ArrowRight, DollarSign } from "lucide-react";
+import { Upload, Loader2, Sparkles, CheckCircle, AlertCircle, Image as ImageIcon, ArrowRight, DollarSign, X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const GENERATION_STEPS = [
-  { label: "تحليل المنتج بالذكاء الاصطناعي...", progress: 10 },
+  { label: "تحليل صور المنتج بالذكاء الاصطناعي...", progress: 10 },
   { label: "التعرف على المنتج والبحث عن معلوماته...", progress: 25 },
   { label: "إنشاء المحتوى التسويقي بالعربية...", progress: 40 },
   { label: "إنشاء صور المنتج الاحترافية...", progress: 55 },
@@ -20,12 +20,17 @@ const GENERATION_STEPS = [
   { label: "تم إنشاء صفحة الهبوط! ✅", progress: 100 },
 ];
 
+const MAX_IMAGES = 5;
+
 export function ProductUpload() {
   const {
     currentView,
     setCurrentView,
     setGeneratedProject,
-    setProductImage,
+    addProductImage,
+    removeProductImage,
+    clearProductImages,
+    productImages,
     setIsGenerating,
     setGenerationProgress,
     setGenerationStep,
@@ -40,7 +45,6 @@ export function ProductUpload() {
   } = useApp();
 
   const [isDragging, setIsDragging] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fileToBase64 = (file: File): Promise<string> => {
@@ -70,29 +74,35 @@ export function ProductUpload() {
   };
 
   const handleGenerate = async () => {
-    if (!productImageBase64 || !productImageUrl) return;
+    if (productImages.length === 0) return;
     
     setError(null);
     setIsGenerating(true);
     setCurrentView("generating");
     setGenerationProgress(5);
-    setGenerationStep("تحضير الصورة...");
+    setGenerationStep("تحضير الصور...");
 
     const progressInterval = simulateProgress();
 
     try {
-      // Step 1: Analyze product with price
+      // Send all images to analyze
+      const imagesBase64 = productImages.map(img => img.base64);
+      
       const { data: analysisData, error: analysisError } = await supabase.functions.invoke("analyze-product", {
-        body: { imageBase64: productImageBase64, userPrice: userPrice || null },
+        body: { 
+          imageBase64: imagesBase64[0], 
+          additionalImages: imagesBase64.slice(1),
+          userPrice: userPrice || null 
+        },
       });
 
       if (analysisError) throw new Error(analysisError.message || "خطأ في التحليل");
       if (analysisData?.error) throw new Error(analysisData.error);
 
-      // Step 2: Generate matching images
+      // Generate matching images
       const { data: imageData } = await supabase.functions.invoke("generate-product-images", {
         body: {
-          imageBase64: productImageBase64,
+          imageBase64: imagesBase64[0],
           productName: analysisData.product?.name,
           productCategory: analysisData.product?.category,
         },
@@ -111,7 +121,7 @@ export function ProductUpload() {
         landingPage: analysisData.landingPage,
         seo: analysisData.seo,
         design: analysisData.design,
-        productImageUrl,
+        productImageUrl: productImages[0].url,
         generatedImages,
         template: selectedTemplate,
       });
@@ -132,13 +142,21 @@ export function ProductUpload() {
   };
 
   const handleFiles = async (files: FileList | File[]) => {
-    const file = Array.from(files).find(f => f.type.startsWith("image/"));
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    const base64 = await fileToBase64(file);
-    setPreviewUrl(url);
-    setProductImage(url, base64, file);
-    setCurrentView("price");
+    const imageFiles = Array.from(files).filter(f => f.type.startsWith("image/"));
+    if (imageFiles.length === 0) return;
+
+    const remaining = MAX_IMAGES - productImages.length;
+    const toAdd = imageFiles.slice(0, remaining);
+
+    for (const file of toAdd) {
+      const url = URL.createObjectURL(file);
+      const base64 = await fileToBase64(file);
+      addProductImage(url, base64, file);
+    }
+
+    if (imageFiles.length > remaining) {
+      toast.info(`تم إضافة ${remaining} صور فقط (الحد الأقصى ${MAX_IMAGES})`);
+    }
   };
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -155,7 +173,7 @@ export function ProductUpload() {
     e.preventDefault();
     setIsDragging(false);
     handleFiles(e.dataTransfer.files);
-  }, []);
+  }, [productImages.length]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) handleFiles(e.target.files);
@@ -163,15 +181,22 @@ export function ProductUpload() {
 
   // GENERATING VIEW
   if (isGenerating || currentView === "generating") {
-    const imgUrl = previewUrl || productImageUrl;
     return (
       <div className="min-h-[80vh] flex items-center justify-center animate-fade-in" dir="rtl">
         <div className="max-w-lg w-full space-y-8 text-center">
-          {imgUrl && (
-            <div className="w-32 h-32 mx-auto rounded-2xl overflow-hidden border-2 border-primary/30 shadow-lg shadow-primary/20">
-              <img src={imgUrl} alt="المنتج" className="w-full h-full object-cover" />
-            </div>
-          )}
+          {/* Show uploaded images thumbnails */}
+          <div className="flex justify-center gap-2 flex-wrap">
+            {productImages.slice(0, 4).map((img, i) => (
+              <div key={i} className="w-20 h-20 rounded-xl overflow-hidden border-2 border-primary/30 shadow-lg shadow-primary/20">
+                <img src={img.url} alt={`المنتج ${i + 1}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+            {productImages.length > 4 && (
+              <div className="w-20 h-20 rounded-xl bg-primary/10 border-2 border-primary/30 flex items-center justify-center text-primary font-bold">
+                +{productImages.length - 4}
+              </div>
+            )}
+          </div>
           <div>
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
               <Sparkles className="w-8 h-8 text-primary animate-pulse" />
@@ -205,22 +230,37 @@ export function ProductUpload() {
 
   // PRICE INPUT VIEW
   if (currentView === "price") {
-    const imgUrl = previewUrl || productImageUrl;
     return (
       <div className="min-h-[80vh] flex items-center justify-center animate-fade-in" dir="rtl">
         <div className="max-w-xl w-full space-y-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold mb-3">
-              تم اختيار <span className="gradient-text">صورة المنتج</span>
+              تم اختيار <span className="gradient-text">{productImages.length} صورة</span> للمنتج
             </h2>
             <p className="text-muted-foreground">أدخل السعر بالدينار الجزائري (اختياري) ثم ابدأ الإنشاء</p>
           </div>
 
-          {imgUrl && (
-            <div className="w-48 h-48 mx-auto rounded-2xl overflow-hidden border-2 border-primary/30 shadow-xl shadow-primary/20">
-              <img src={imgUrl} alt="المنتج" className="w-full h-full object-cover" />
-            </div>
-          )}
+          {/* Image thumbnails grid */}
+          <div className="flex justify-center gap-3 flex-wrap">
+            {productImages.map((img, i) => (
+              <div key={i} className="relative group">
+                <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-primary/30 shadow-xl shadow-primary/20">
+                  <img src={img.url} alt={`المنتج ${i + 1}`} className="w-full h-full object-cover" />
+                </div>
+                <button
+                  onClick={() => removeProductImage(i)}
+                  className="absolute -top-2 -left-2 w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+                {i === 0 && (
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                    رئيسية
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
 
           <Card className="border-primary/20">
             <CardContent className="p-6 space-y-4">
@@ -249,15 +289,16 @@ export function ProductUpload() {
               variant="outline"
               className="flex-1"
               onClick={() => {
-                setPreviewUrl(null);
+                clearProductImages();
                 setCurrentView("upload");
               }}
             >
-              تغيير الصورة
+              تغيير الصور
             </Button>
             <Button
               className="flex-1 btn-gradient gap-2 text-lg h-14"
               onClick={handleGenerate}
+              disabled={productImages.length === 0}
             >
               <Sparkles className="w-5 h-5" />
               إنشاء صفحة الهبوط
@@ -279,12 +320,12 @@ export function ProductUpload() {
             <span>الذكاء الاصطناعي يُنشئ كل شيء تلقائياً</span>
           </div>
           <h1 className="text-4xl font-bold mb-3">
-            ارفع صورة المنتج،{" "}
+            ارفع صور المنتج،{" "}
             <span className="gradient-text">احصل على صفحة هبوط كاملة</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            الذكاء الاصطناعي يتعرف على منتجك، يبحث عن معلوماته، يُنشئ صوراً احترافية
-            مطابقة للمنتج الأصلي، ويُجمّع صفحة هبوط جاهزة للبيع على WordPress.
+            ارفع عدة صور للمنتج (حتى {MAX_IMAGES} صور) ليفهم الذكاء الاصطناعي منتجك بشكل أفضل
+            ويُنشئ صفحة هبوط احترافية مع صور مطابقة.
           </p>
         </div>
 
@@ -301,38 +342,86 @@ export function ProductUpload() {
           </Card>
         )}
 
-        <Card
-          className={cn(
-            "border-2 border-dashed transition-all duration-300 cursor-pointer group",
-            isDragging ? "border-primary bg-primary/5 scale-[1.02]" : "border-border hover:border-primary/50 hover:bg-primary/[0.02]"
-          )}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <input type="file" id="photo-upload" accept="image/*" className="hidden" onChange={handleFileSelect} />
-            <label htmlFor="photo-upload" className="flex flex-col items-center cursor-pointer">
-              <div className="p-6 rounded-2xl bg-primary/10 mb-6 group-hover:bg-primary/15 transition-colors">
-                <Upload className="w-12 h-12 text-primary" />
-              </div>
-              <p className="text-xl font-semibold mb-2">
-                {isDragging ? "أسقط صورتك هنا" : "اسحب وأسقط صورة المنتج"}
-              </p>
-              <p className="text-muted-foreground mb-6">أو انقر للاختيار</p>
-              <Button className="btn-gradient gap-2" size="lg">
-                <ImageIcon className="w-5 h-5" />
-                اختر صورة
+        {/* Uploaded images preview */}
+        {productImages.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium">{productImages.length} / {MAX_IMAGES} صور مُرفقة</p>
+              <Button variant="ghost" size="sm" onClick={clearProductImages} className="text-destructive hover:text-destructive">
+                حذف الكل
               </Button>
-              <p className="text-xs text-muted-foreground mt-4">PNG, JPG, WEBP • حد أقصى 20MB</p>
-            </label>
-          </CardContent>
-        </Card>
+            </div>
+            <div className="grid grid-cols-5 gap-3">
+              {productImages.map((img, i) => (
+                <div key={i} className="relative group aspect-square rounded-xl overflow-hidden border-2 border-primary/20">
+                  <img src={img.url} alt={`صورة ${i + 1}`} className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => removeProductImage(i)}
+                    className="absolute top-1 left-1 w-6 h-6 bg-black/60 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                  {i === 0 && (
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full whitespace-nowrap">
+                      صورة رئيسية
+                    </span>
+                  )}
+                </div>
+              ))}
+              {/* Add more button */}
+              {productImages.length < MAX_IMAGES && (
+                <label className="aspect-square rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center cursor-pointer transition-colors">
+                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileSelect} />
+                  <Plus className="w-6 h-6 text-muted-foreground mb-1" />
+                  <span className="text-[10px] text-muted-foreground">إضافة</span>
+                </label>
+              )}
+            </div>
+            <Button
+              className="w-full btn-gradient gap-2 text-lg h-14"
+              onClick={() => setCurrentView("price")}
+            >
+              <ArrowRight className="w-5 h-5" />
+              متابعة
+            </Button>
+          </div>
+        )}
+
+        {/* Upload area */}
+        {productImages.length === 0 && (
+          <Card
+            className={cn(
+              "border-2 border-dashed transition-all duration-300 cursor-pointer group",
+              isDragging ? "border-primary bg-primary/5 scale-[1.02]" : "border-border hover:border-primary/50 hover:bg-primary/[0.02]"
+            )}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <input type="file" id="photo-upload" accept="image/*" multiple className="hidden" onChange={handleFileSelect} />
+              <label htmlFor="photo-upload" className="flex flex-col items-center cursor-pointer">
+                <div className="p-6 rounded-2xl bg-primary/10 mb-6 group-hover:bg-primary/15 transition-colors">
+                  <Upload className="w-12 h-12 text-primary" />
+                </div>
+                <p className="text-xl font-semibold mb-2">
+                  {isDragging ? "أسقط صورك هنا" : "اسحب وأسقط صور المنتج"}
+                </p>
+                <p className="text-muted-foreground mb-6">أو انقر لاختيار عدة صور</p>
+                <Button className="btn-gradient gap-2" size="lg">
+                  <ImageIcon className="w-5 h-5" />
+                  اختر صور المنتج
+                </Button>
+                <p className="text-xs text-muted-foreground mt-4">PNG, JPG, WEBP • حتى {MAX_IMAGES} صور • حد أقصى 20MB لكل صورة</p>
+              </label>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid grid-cols-3 gap-4 text-center">
           {[
+            { icon: "📸", title: "صور متعددة", desc: "ارفع حتى 5 صور لتحليل أدق" },
             { icon: "🔍", title: "تعرّف ذكي", desc: "التعرف الدقيق على المنتج الأصلي" },
-            { icon: "🎨", title: "صور مطابقة", desc: "صور احترافية مطابقة للمنتج" },
             { icon: "🚀", title: "جاهز لـ WordPress", desc: "صفحة جاهزة للنشر والبيع" },
           ].map(item => (
             <div key={item.title} className="p-4 rounded-xl bg-card border border-border">
