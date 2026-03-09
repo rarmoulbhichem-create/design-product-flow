@@ -21,6 +21,11 @@ const PAYMENT_INFO = {
   },
 };
 
+const PLAN_PRICES = {
+  starter: 2850,
+  pro: 7350,
+};
+
 export default function UpgradePage() {
   const { t, dir } = useLanguage();
   const { user } = useAuth();
@@ -55,7 +60,7 @@ export default function UpgradePage() {
     try {
       const { error } = await supabase.from("payment_requests").insert({
         user_id: user.id,
-        amount: 2000,
+        amount: PLAN_PRICES.pro,
         payment_method: paymentMethod,
         transaction_id: transactionId.trim(),
         status: "pending",
@@ -213,7 +218,7 @@ export default function UpgradePage() {
               <p className="font-medium mb-1">
                 {isFr ? "💰 Montant à envoyer :" : "💰 المبلغ المطلوب:"}
               </p>
-              <p className="text-lg font-bold">{t.proPrice}</p>
+              <p className="text-lg font-bold">{PLAN_PRICES.pro.toLocaleString()} DA</p>
             </div>
           </CardContent>
         </Card>

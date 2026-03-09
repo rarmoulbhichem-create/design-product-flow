@@ -111,18 +111,28 @@ export default function LandingPage() {
       {/* Pricing Preview */}
       <section id="pricing" className="py-20 bg-secondary/30">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
+          <div className="text-center mb-6">
             <h2 className="text-3xl font-bold mb-4">{t.simplePricing}</h2>
             <p className="text-muted-foreground">{t.startFreeScale}</p>
           </div>
+          <div className="flex flex-wrap justify-center gap-3 mb-12">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-500/10 text-green-600 text-sm font-medium">
+              ✨ {t.freeTrial}
+            </span>
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+              🎁 {t.annualDiscount}
+            </span>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Free Plan */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {/* Starter Plan */}
             <div className="p-8 rounded-xl bg-card border border-border">
-              <h3 className="text-xl font-bold mb-2">{t.free}</h3>
-              <p className="text-3xl font-bold mb-4">{t.freePrice}</p>
+              <h3 className="text-xl font-bold mb-2">{t.starter}</h3>
+              <p className="text-3xl font-bold mb-4">
+                {t.starterPrice}<span className="text-lg text-muted-foreground">{t.month}</span>
+              </p>
               <ul className="space-y-3 mb-8">
-                {[t.oneLandingMonth, t.tenAiImages, t.zipExport, t.communitySupport].map(
+                {[t.starterFeature1, t.starterFeature2, t.starterFeature3, t.starterFeature4].map(
                   (feature) => (
                     <li key={feature} className="flex items-center gap-2 text-sm">
                       <Check className="w-4 h-4 text-green-500" />
@@ -132,7 +142,7 @@ export default function LandingPage() {
                 )}
               </ul>
               <Button variant="outline" className="w-full" asChild>
-                <Link to="/new">{t.start}</Link>
+                <Link to="/new">{t.startTrial}</Link>
               </Button>
             </div>
 
@@ -147,11 +157,11 @@ export default function LandingPage() {
               </p>
               <ul className="space-y-3 mb-8">
                 {[
-                  t.unlimitedLandings,
-                  t.fiveHundredImagesMonth,
-                  t.wordpressExportFeature,
-                  t.premiumStyles,
-                  t.prioritySupport,
+                  t.proFeature1,
+                  t.proFeature2,
+                  t.proFeature3,
+                  t.proFeature4,
+                  t.proFeature5,
                 ].map((feature) => (
                   <li key={feature} className="flex items-center gap-2 text-sm">
                     <Check className="w-4 h-4 text-green-500" />
@@ -160,7 +170,30 @@ export default function LandingPage() {
                 ))}
               </ul>
               <Button className="w-full btn-gradient" asChild>
-                <Link to="/new">{t.goToPro}</Link>
+                <Link to="/upgrade">{t.goToPro}</Link>
+              </Button>
+            </div>
+
+            {/* Enterprise Plan */}
+            <div className="p-8 rounded-xl bg-card border border-border">
+              <h3 className="text-xl font-bold mb-2">{t.enterprise}</h3>
+              <p className="text-2xl font-bold mb-4">{t.enterprisePrice}</p>
+              <ul className="space-y-3 mb-8">
+                {[
+                  t.enterpriseFeature1,
+                  t.enterpriseFeature2,
+                  t.enterpriseFeature3,
+                  t.enterpriseFeature4,
+                  t.enterpriseFeature5,
+                ].map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-sm">
+                    <Check className="w-4 h-4 text-green-500" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <Button variant="outline" className="w-full" asChild>
+                <Link to="/contact">{t.contactUs}</Link>
               </Button>
             </div>
           </div>
