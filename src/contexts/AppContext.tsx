@@ -179,7 +179,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setSelectedTemplate = useCallback((selectedTemplate: LandingTemplate) => {
-    setState(prev => ({ ...prev, selectedTemplate }));
+    setState(prev => ({
+      ...prev,
+      selectedTemplate,
+      generatedProject: prev.generatedProject
+        ? { ...prev.generatedProject, template: selectedTemplate }
+        : null,
+    }));
   }, []);
 
   const resetApp = useCallback(() => {
