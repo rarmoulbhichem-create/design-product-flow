@@ -95,6 +95,12 @@ export interface SeoData {
   keywords: string[];
 }
 
+export interface GeneratedImage {
+  id: string;
+  url: string;
+  prompt: string;
+}
+
 export interface GeneratedProject {
   product: ProductData;
   pricing: PricingData;
@@ -102,6 +108,7 @@ export interface GeneratedProject {
   seo: SeoData;
   design: DesignData;
   productImageUrl: string;
+  generatedImages: GeneratedImage[];
   template: LandingTemplate;
 }
 
