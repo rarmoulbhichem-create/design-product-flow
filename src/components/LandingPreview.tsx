@@ -1,5 +1,6 @@
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -251,12 +252,19 @@ export function LandingPreview() {
       )}
 
       {/* Landing Page Content */}
-      <div className={cn(
-        "mx-auto transition-all duration-500",
-        viewMode === "mobile" ? "max-w-[390px]" : "max-w-full",
-        tmpl.bgClass,
-        tmpl.fontClass,
-      )} dir={selectedLanguage === "fr" ? "ltr" : "rtl"}>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={generatedProject.template}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.35, ease: "easeInOut" }}
+          className={cn(
+            "mx-auto transition-all duration-500",
+            viewMode === "mobile" ? "max-w-[390px]" : "max-w-full",
+            tmpl.bgClass,
+            tmpl.fontClass,
+          )} dir={selectedLanguage === "fr" ? "ltr" : "rtl"}>
 
         {/* HERO */}
         <section className={cn("relative overflow-hidden", tmpl.heroExtraClass || "py-16 md:py-24")}>
@@ -752,7 +760,8 @@ export function LandingPreview() {
             {t.allRights(product.brand || product.name)}
           </p>
         </footer>
-      </div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
