@@ -18,19 +18,13 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Public landing page */}
           <Route path="/" element={<LandingPage />} />
-
-          {/* App routes with sidebar */}
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/new" element={<NewProjectPage />} />
             <Route path="/projects" element={<DashboardPage />} />
-            <Route path="/templates" element={<DashboardPage />} />
             <Route path="/settings" element={<DashboardPage />} />
           </Route>
-
-          {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

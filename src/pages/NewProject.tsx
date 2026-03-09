@@ -1,15 +1,28 @@
-import { Wizard } from "@/components/wizard/Wizard";
+import { AppProvider, useApp } from "@/contexts/AppContext";
+import { ProductUpload } from "@/components/ProductUpload";
+import { LandingPreview } from "@/components/LandingPreview";
+import { ExportPage } from "@/components/ExportPage";
+
+function AppContent() {
+  const { currentView } = useApp();
+
+  switch (currentView) {
+    case "upload":
+    case "generating":
+      return <ProductUpload />;
+    case "preview":
+      return <LandingPreview />;
+    case "export":
+      return <ExportPage />;
+    default:
+      return <ProductUpload />;
+  }
+}
 
 export default function NewProjectPage() {
   return (
-    <div className="animate-fade-in">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold gradient-text">Créer une landing page</h1>
-        <p className="text-muted-foreground mt-1">
-          En 7 étapes, générez une page professionnelle exportable vers WordPress
-        </p>
-      </div>
-      <Wizard />
-    </div>
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
   );
 }
