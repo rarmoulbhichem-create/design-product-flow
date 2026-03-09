@@ -126,6 +126,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ...state,
       setCurrentView,
       setGeneratedProject,
+      updateGeneratedProject,
       addProductImage,
       removeProductImage,
       clearProductImages,
