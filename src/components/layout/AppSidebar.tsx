@@ -37,7 +37,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { t, dir } = useLanguage();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
