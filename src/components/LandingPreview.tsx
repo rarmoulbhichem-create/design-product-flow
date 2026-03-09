@@ -171,6 +171,32 @@ export function LandingPreview() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* Undo/Redo buttons */}
+          {editMode && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={undo}
+                disabled={!canUndo}
+                className="gap-1"
+                title="Undo"
+              >
+                <Undo2 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={redo}
+                disabled={!canRedo}
+                className="gap-1"
+                title="Redo"
+              >
+                <Redo2 className="w-4 h-4" />
+              </Button>
+              <div className="h-6 w-px bg-border" />
+            </>
+          )}
           {/* Edit mode toggle */}
           <Button
             variant={editMode ? "default" : "outline"}
