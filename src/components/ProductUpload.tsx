@@ -266,6 +266,38 @@ export function ProductUpload() {
             ))}
           </div>
 
+          {/* Language selector */}
+          <Card className="border-primary/20">
+            <CardContent className="p-6 space-y-3">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Globe className="w-4 h-4 text-primary" />
+                لغة صفحة الهبوط
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {([
+                  { id: "ar" as LandingLanguage, label: "العربية", flag: "🇩🇿", desc: "عربية جزائرية" },
+                  { id: "fr" as LandingLanguage, label: "Français", flag: "🇫🇷", desc: "فرنسية جزائرية" },
+                  { id: "both" as LandingLanguage, label: "الاثنتان", flag: "🌍", desc: "عربية + فرنسية" },
+                ]).map(lang => (
+                  <button
+                    key={lang.id}
+                    onClick={() => setSelectedLanguage(lang.id)}
+                    className={cn(
+                      "p-4 rounded-xl border-2 text-center transition-all",
+                      selectedLanguage === lang.id
+                        ? "border-primary bg-primary/10 shadow-md shadow-primary/10"
+                        : "border-border hover:border-primary/30"
+                    )}
+                  >
+                    <span className="text-2xl block mb-1">{lang.flag}</span>
+                    <span className="font-semibold text-sm block">{lang.label}</span>
+                    <span className="text-[10px] text-muted-foreground">{lang.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="border-primary/20">
             <CardContent className="p-6 space-y-4">
               <div className="space-y-2">
