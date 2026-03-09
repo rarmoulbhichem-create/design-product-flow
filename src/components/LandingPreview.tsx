@@ -819,6 +819,7 @@ export function LandingPreview() {
           price={pricing.price}
           currency={pricing.currency}
           label={selectedLanguage === "fr" ? "Commander" : "اطلب الآن"}
+          phoneNumber={generatedProject.whatsappNumber}
         />
         </motion.div>
       </AnimatePresence>
