@@ -49,6 +49,7 @@ export interface UploadedImage {
   url: string;
   name: string;
   isPrimary: boolean;
+  file?: File;
 }
 
 export interface GeneratedImage {
