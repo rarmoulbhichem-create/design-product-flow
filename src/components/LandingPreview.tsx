@@ -571,13 +571,6 @@ export function LandingPreview() {
     </div>
   );
 }
-
-
-        {/* BENEFITS */}
-        <section className="py-16 md:py-20">
-          <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
-              لماذا تختار {product.name}؟
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {(landingPage.benefits || []).map((benefit, i) => {
