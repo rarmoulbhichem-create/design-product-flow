@@ -648,6 +648,7 @@ export function LandingPreview() {
               ))}
             </div>
           </div>
+        </section>
         </ScrollReveal>
 
         {/* PRICING CTA */}
