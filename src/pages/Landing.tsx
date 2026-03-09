@@ -120,7 +120,7 @@ export default function LandingPage() {
             {/* Free Plan */}
             <div className="p-8 rounded-xl bg-card border border-border">
               <h3 className="text-xl font-bold mb-2">{t.free}</h3>
-              <p className="text-3xl font-bold mb-4">0€</p>
+              <p className="text-3xl font-bold mb-4">{t.freePrice}</p>
               <ul className="space-y-3 mb-8">
                 {[t.oneLandingMonth, t.tenAiImages, t.zipExport, t.communitySupport].map(
                   (feature) => (
@@ -143,7 +143,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-bold mb-2">{t.pro}</h3>
               <p className="text-3xl font-bold mb-4">
-                29€<span className="text-lg text-muted-foreground">{t.month}</span>
+                {t.proPrice}<span className="text-lg text-muted-foreground">{t.month}</span>
               </p>
               <ul className="space-y-3 mb-8">
                 {[
