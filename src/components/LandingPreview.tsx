@@ -17,6 +17,8 @@ import { EditableImage } from "./EditableImage";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { TEMPLATE_STYLES, TEMPLATE_LIST, type TemplateStyle } from "@/lib/templates";
 import { TemplatePicker } from "./TemplatePicker";
+import { ScrollReveal } from "./ScrollReveal";
+import { WhatsAppButton } from "./WhatsAppButton";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Star, Shield, Zap, Heart, Check, Truck, Lock, RefreshCw, Headphones,
@@ -465,6 +467,7 @@ export function LandingPreview() {
         </section>
 
         {/* TRUST BADGES */}
+        <ScrollReveal>
         <section className={cn("py-6 border-y", tmpl.isDark ? "border-white/10 bg-white/[0.02]" : "border-border bg-card/50")}>
           <div className="container mx-auto px-4">
             <div className="flex flex-wrap justify-center gap-6 md:gap-12">
@@ -487,6 +490,7 @@ export function LandingPreview() {
             </div>
           </div>
         </section>
+        </ScrollReveal>
 
         {/* SOCIAL PROOF */}
         {landingPage.socialProof && (
@@ -510,6 +514,7 @@ export function LandingPreview() {
         )}
 
         {/* BENEFITS */}
+        <ScrollReveal>
         <section className="py-16 md:py-20">
           <div className="container mx-auto px-4">
             <h2 className={cn("text-2xl md:text-3xl font-bold text-center mb-12", tmpl.headingClass && !tmpl.headingClass.includes("bg-clip") ? tmpl.headingClass : "")}>
@@ -519,7 +524,8 @@ export function LandingPreview() {
               {(landingPage.benefits || []).map((benefit, i) => {
                 const Icon = ICON_MAP[benefit.icon] || Star;
                 return (
-                  <div key={i} className={cn("text-center", tmpl.featureCardClass)}>
+                  <ScrollReveal key={i} delay={i * 0.1}>
+                  <div className={cn("text-center", tmpl.featureCardClass)}>
                     <div className="space-y-3">
                       <div className="w-12 h-12 mx-auto rounded-xl flex items-center justify-center" style={{ backgroundColor: tmpl.isDark ? `${primaryColor}20` : `${primaryColor}15` }}>
                         <Icon className="w-6 h-6" style={{ color: primaryColor }} />
@@ -528,11 +534,13 @@ export function LandingPreview() {
                       <EditableText value={benefit.description} onChange={v => updateBenefit(i, { description: v })} editMode={editMode} as="p" className={cn("text-sm", tmpl.isDark ? "text-white/60" : "text-muted-foreground")} multiline />
                     </div>
                   </div>
+                  </ScrollReveal>
                 );
               })}
             </div>
           </div>
         </section>
+        </ScrollReveal>
 
         {/* PRODUCT DETAILS + GALLERY */}
         <section className={cn("py-16 md:py-20", tmpl.sectionAltClass)}>
@@ -580,12 +588,14 @@ export function LandingPreview() {
         </section>
 
         {/* FEATURES */}
+        <ScrollReveal>
         <section className="py-16 md:py-20">
           <div className="container mx-auto px-4">
             <h2 className={cn("text-2xl md:text-3xl font-bold text-center mb-12", tmpl.headingClass && !tmpl.headingClass.includes("bg-clip") ? tmpl.headingClass : "")}>{t.features}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {(landingPage.features || []).map((feature, i) => (
-                <div key={i} className={tmpl.featureCardClass}>
+                <ScrollReveal key={i} delay={i * 0.08}>
+                <div className={tmpl.featureCardClass}>
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: tmpl.isDark ? `${primaryColor}20` : `${primaryColor}15` }}>
                       <Check className="w-4 h-4" style={{ color: primaryColor }} />
@@ -596,12 +606,14 @@ export function LandingPreview() {
                     </div>
                   </div>
                 </div>
+                </ScrollReveal>
               ))}
             </div>
           </div>
         </section>
+        </ScrollReveal>
 
-        {/* TESTIMONIALS */}
+        <ScrollReveal>
         <section className={cn("py-16 md:py-20", tmpl.sectionAltClass)}>
           <div className="container mx-auto px-4">
             <h2 className={cn("text-2xl md:text-3xl font-bold text-center mb-4", tmpl.headingClass && !tmpl.headingClass.includes("bg-clip") ? tmpl.headingClass : "")}>{t.testimonials}</h2>
@@ -637,6 +649,7 @@ export function LandingPreview() {
             </div>
           </div>
         </section>
+        </ScrollReveal>
 
         {/* PRICING CTA */}
         <section className="py-16 md:py-20">
@@ -672,6 +685,7 @@ export function LandingPreview() {
         </section>
 
         {/* FAQ */}
+        <ScrollReveal>
         <section className={cn("py-16 md:py-20", tmpl.sectionAltClass)}>
           <div className="container mx-auto px-4 max-w-3xl">
             <h2 className={cn("text-2xl md:text-3xl font-bold text-center mb-12", tmpl.headingClass && !tmpl.headingClass.includes("bg-clip") ? tmpl.headingClass : "")}>{t.faq}</h2>
@@ -699,8 +713,10 @@ export function LandingPreview() {
             </div>
           </div>
         </section>
+        </ScrollReveal>
 
         {/* FINAL CTA */}
+        <ScrollReveal>
         <section className="py-16 md:py-24 relative overflow-hidden">
           {!tmpl.isDark && <div className="absolute inset-0 opacity-5" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }} />}
           {tmpl.isDark && <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />}
@@ -720,13 +736,22 @@ export function LandingPreview() {
               className={cn("text-lg max-w-xl mx-auto", tmpl.isDark ? "text-white/60" : "text-muted-foreground")}
               multiline
             />
-            <Button size="lg" className={cn("text-lg px-12 py-6", tmpl.ctaClass)} style={!tmpl.ctaClass.includes("bg-") ? { background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` } : undefined}>
-              <EditableText
-                value={landingPage.finalCta?.buttonText || landingPage.hero.ctaText}
-                onChange={v => updateFinalCta({ buttonText: v })}
-                editMode={editMode}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button size="lg" className={cn("text-lg px-12 py-6", tmpl.ctaClass)} style={!tmpl.ctaClass.includes("bg-") ? { background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` } : undefined}>
+                <EditableText
+                  value={landingPage.finalCta?.buttonText || landingPage.hero.ctaText}
+                  onChange={v => updateFinalCta({ buttonText: v })}
+                  editMode={editMode}
+                />
+              </Button>
+              <WhatsAppButton
+                productName={product.name}
+                price={pricing.price}
+                currency={pricing.currency}
+                inline
+                label={selectedLanguage === "fr" ? "Commander via WhatsApp" : "اطلب عبر WhatsApp"}
               />
-            </Button>
+            </div>
             <EditableText
               value={landingPage.finalCta?.guaranteeText || pricing.guarantee}
               onChange={v => updateFinalCta({ guaranteeText: v })}
@@ -736,6 +761,7 @@ export function LandingPreview() {
             />
           </div>
         </section>
+        </ScrollReveal>
 
         {/* FOOTER */}
         <footer className={cn("py-8 border-t text-center", tmpl.isDark ? "border-white/10" : "border-border")}>
@@ -743,6 +769,14 @@ export function LandingPreview() {
             {t.allRights(product.brand || product.name)}
           </p>
         </footer>
+
+        {/* Floating WhatsApp Button */}
+        <WhatsAppButton
+          productName={product.name}
+          price={pricing.price}
+          currency={pricing.currency}
+          label={selectedLanguage === "fr" ? "Commander" : "اطلب الآن"}
+        />
         </motion.div>
       </AnimatePresence>
     </div>
