@@ -95,7 +95,8 @@ export function ProductUpload() {
         body: { 
           imageBase64: imagesBase64[0], 
           additionalImages: imagesBase64.slice(1),
-          userPrice: userPrice || null 
+          userPrice: userPrice || null,
+          language: selectedLanguage,
         },
       });
 
