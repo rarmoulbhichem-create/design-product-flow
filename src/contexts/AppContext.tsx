@@ -21,6 +21,7 @@ interface AppState {
 interface AppContextType extends AppState {
   setCurrentView: (view: AppState["currentView"]) => void;
   setGeneratedProject: (project: GeneratedProject | null) => void;
+  updateGeneratedProject: (updater: (prev: GeneratedProject) => GeneratedProject) => void;
   addProductImage: (url: string, base64: string, file?: File) => void;
   removeProductImage: (index: number) => void;
   clearProductImages: () => void;
@@ -58,6 +59,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setGeneratedProject = useCallback((generatedProject: GeneratedProject | null) => {
     setState(prev => ({ ...prev, generatedProject }));
+  }, []);
+
+  const updateGeneratedProject = useCallback((updater: (prev: GeneratedProject) => GeneratedProject) => {
+    setState(prev => {
+      if (!prev.generatedProject) return prev;
+      return { ...prev, generatedProject: updater(prev.generatedProject) };
+    });
   }, []);
 
   const addProductImage = useCallback((url: string, base64: string, file?: File) => {
@@ -118,6 +126,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ...state,
       setCurrentView,
       setGeneratedProject,
+      updateGeneratedProject,
       addProductImage,
       removeProductImage,
       clearProductImages,
