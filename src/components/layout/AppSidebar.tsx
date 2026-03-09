@@ -155,7 +155,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer with upgrade */}
-      <SidebarFooter className="border-t border-sidebar-border p-3">
+      <SidebarFooter className="border-t border-sidebar-border p-3 space-y-2">
         {!collapsed && (
           <div className="rounded-lg bg-sidebar-accent p-3">
             <div className="flex items-center gap-2 mb-2">
@@ -170,6 +170,15 @@ export function AppSidebar() {
             </Button>
           </div>
         )}
+        <Button
+          variant="ghost"
+          size={collapsed ? "icon" : "sm"}
+          className="w-full gap-2 text-muted-foreground hover:text-destructive"
+          onClick={signOut}
+        >
+          <LogOut className="w-4 h-4" />
+          {!collapsed && (dir === "ltr" ? "Déconnexion" : "تسجيل الخروج")}
+        </Button>
       </SidebarFooter>
     </Sidebar>
   );
