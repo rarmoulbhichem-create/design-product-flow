@@ -173,7 +173,7 @@ export function ExportPage() {
   </section>
 
   <!-- Floating WhatsApp -->
-  <a href="https://wa.me/?text=${encodeURIComponent(`مرحباً! أريد طلب: ${product.name}`)}" target="_blank" class="whatsapp-float">
+  <a href="https://wa.me/${waPhone}?text=${encodeURIComponent(`مرحباً! أريد طلب: ${product.name}`)}" target="_blank" class="whatsapp-float">
     💬 اطلب الآن
   </a>
 
