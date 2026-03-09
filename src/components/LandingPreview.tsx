@@ -149,8 +149,8 @@ export function LandingPreview() {
   const detailImage = generatedImages[1]?.url || productImageUrl;
   const currency = pricing?.currency || "DZD";
 
-  const primaryColor = tmpl.overrideColors?.primary || design?.primaryColor || "#7c3aed";
-  const accentColor = tmpl.overrideColors?.accent || design?.accentColor || "#06b6d4";
+  const primaryColor = generatedProject.storeSettings?.customPrimaryColor || tmpl.overrideColors?.primary || design?.primaryColor || "#7c3aed";
+  const accentColor = generatedProject.storeSettings?.customAccentColor || tmpl.overrideColors?.accent || design?.accentColor || "#06b6d4";
 
   // Helpers for updating nested fields
   const updateProduct = (patch: Partial<typeof product>) =>
