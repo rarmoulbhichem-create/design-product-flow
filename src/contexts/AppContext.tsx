@@ -44,6 +44,7 @@ const initialState: AppState = {
   generatedProject: null,
   productImages: [],
   userPrice: "",
+  selectedLanguage: "ar",
   isGenerating: false,
   generationProgress: 0,
   generationStep: "",
