@@ -139,12 +139,7 @@ export default function TemplatesPage() {
               </div>
             </div>
             <div className="h-[calc(100vh-3.5rem)] overflow-y-auto">
-              <AppProvider>
-                <LandingPreview
-                  project={previewProject}
-                  isPreviewMode={true}
-                />
-              </AppProvider>
+              <DemoPreviewWrapper project={previewProject} />
             </div>
           </motion.div>
         )}
