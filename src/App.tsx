@@ -13,6 +13,7 @@ import DashboardPage from "@/pages/Dashboard";
 import NewProjectPage from "@/pages/NewProject";
 import UpgradePage from "@/pages/Upgrade";
 import AdminPage from "@/pages/Admin";
+import TemplatesPage from "@/pages/Templates";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
