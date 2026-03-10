@@ -13,6 +13,7 @@ import DashboardPage from "@/pages/Dashboard";
 import NewProjectPage from "@/pages/NewProject";
 import UpgradePage from "@/pages/Upgrade";
 import AdminPage from "@/pages/Admin";
+import TemplatesPage from "@/pages/Templates";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/templates" element={<TemplatesPage />} />
               <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/new" element={<NewProjectPage />} />
