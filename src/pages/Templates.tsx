@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Eye, X, Sparkles } from "lucide-react";
@@ -8,9 +8,28 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DEMO_PROJECTS, getDemoProject } from "@/lib/demoProjects";
 import { TEMPLATE_STYLES } from "@/lib/templates";
 import { LandingPreview } from "@/components/LandingPreview";
-import { AppProvider } from "@/contexts/AppContext";
+import { AppProvider, useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { LandingTemplate, GeneratedProject } from "@/types/project";
+
+function DemoPreviewInner({ project }: { project: GeneratedProject }) {
+  const { setGeneratedProject, setCurrentView } = useApp();
+
+  useEffect(() => {
+    setGeneratedProject(project);
+    setCurrentView("preview");
+  }, [project, setGeneratedProject, setCurrentView]);
+
+  return <LandingPreview />;
+}
+
+function DemoPreviewWrapper({ project }: { project: GeneratedProject }) {
+  return (
+    <AppProvider>
+      <DemoPreviewInner project={project} />
+    </AppProvider>
+  );
+}
 
 function TemplateCard({ template, label, product, price, onPreview }: {
   template: LandingTemplate;
